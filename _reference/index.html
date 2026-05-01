@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Андрей — Fullstack-разработчик</title>
+<meta name="description" content="Сделаю сайт, Telegram-бот, парсер или приложение. Fullstack-разработчик, МГТУ им. Баумана.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   RESET & VARIABLES
+   ═══════════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#FAFAF9;
+  --bg-pure:#FFFFFF;
+  --surface:#FFFFFF;
+  --surface-hover:#F5F5F4;
+  --border:#E7E5E4;
+  --border-light:#F0EEEC;
+  --text:#1A1A1A;
+  --text-2:#57534E;
+  --text-3:#A8A29E;
+  --accent:#4F46E5;
+  --accent-light:rgba(79,70,229,0.07);
+  --accent-medium:rgba(79,70,229,0.12);
+  --accent-glow:rgba(79,70,229,0.2);
+  --warm:#F97316;
+  --warm-light:rgba(249,115,22,0.08);
+  --coral:#F43F5E;
+  --green:#10B981;
+  --radius:20px;
+  --radius-sm:14px;
+  --ease-out:cubic-bezier(0.16,1,0.3,1);
+  --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+
+::selection{
+  background:var(--accent);
+  color:#fff;
+}
+
+/* ═══════════════════════════════════════
+   GRADIENT MESH BACKGROUND
+   ═══════════════════════════════════════ */
+.mesh-bg{
+  position:fixed;inset:0;z-index:-2;
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(at 0% 0%,rgba(79,70,229,.06) 0%,transparent 50%),
+    radial-gradient(at 100% 0%,rgba(249,115,22,.05) 0%,transparent 50%),
+    radial-gradient(at 60% 50%,rgba(187,227,255,.06) 0%,transparent 50%),
+    radial-gradient(at 0% 100%,rgba(134,239,172,.04) 0%,transparent 50%),
+    radial-gradient(at 100% 100%,rgba(244,63,94,.04) 0%,transparent 50%);
+  pointer-events:none;
+}
+
+/* Animated blobs behind content */
+.blob-canvas{
+  position:fixed;inset:0;z-index:-1;
+  pointer-events:none;overflow:hidden;
+}
+.blob{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(80px);
+  opacity:.35;
+  will-change:transform;
+}
+.blob-1{
+  width:500px;height:500px;
+  background:rgba(79,70,229,.12);
+  top:-10%;left:10%;
+  animation:blobFloat1 25s ease-in-out infinite;
+}
+.blob-2{
+  width:400px;height:400px;
+  background:rgba(249,115,22,.08);
+  top:40%;right:-5%;
+  animation:blobFloat2 20s ease-in-out infinite;
+}
+.blob-3{
+  width:350px;height:350px;
+  background:rgba(244,63,94,.06);
+  bottom:-5%;left:30%;
+  animation:blobFloat3 22s ease-in-out infinite;
+}
+
+@keyframes blobFloat1{
+  0%,100%{transform:translate(0,0) scale(1);border-radius:60% 40% 30% 70%/60% 30% 70% 40%}
+  33%{transform:translate(40px,-60px) scale(1.1);border-radius:30% 60% 70% 40%/50% 60% 30% 60%}
+  66%{transform:translate(-30px,40px) scale(.95);border-radius:50% 60% 30% 60%/30% 50% 70% 50%}
+}
+@keyframes blobFloat2{
+  0%,100%{transform:translate(0,0) scale(1);border-radius:40% 60% 50% 40%/60% 30% 60% 40%}
+  50%{transform:translate(-50px,30px) scale(1.05);border-radius:60% 40% 30% 70%/40% 60% 50% 40%}
+}
+@keyframes blobFloat3{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(30px,-40px) scale(1.08)}
+  66%{transform:translate(-40px,20px) scale(.92)}
+}
+
+
+/* ═══════════════════════════════════════
+   NAV
+   ═══════════════════════════════════════ */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:20px 0;
+  transition:all .5s var(--ease-out);
+}
+.nav.scrolled{
+  background:rgba(250,250,249,.8);
+  backdrop-filter:blur(20px) saturate(1.5);
+  border-bottom:1px solid var(--border-light);
+  padding:14px 0;
+}
+.nav .container{display:flex;align-items:center;justify-content:space-between}
+
+.container{max-width:1240px;margin:0 auto;padding:0 32px}
+
+.nav-logo{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.4rem;font-weight:700;
+  letter-spacing:-.03em;
+}
+.nav-logo span{color:var(--accent)}
+
+.nav-links{display:flex;gap:36px;list-style:none}
+.nav-links a{
+  font-size:.875rem;font-weight:500;color:var(--text-2);
+  transition:color .3s;
+  padding:4px 0;
+}
+.nav-links a:hover{color:var(--text)}
+
+.nav-cta{
+  padding:10px 24px;border-radius:100px;
+  background:var(--text);color:var(--bg-pure);
+  font-size:.85rem;font-weight:600;
+  transition:all .4s var(--ease-spring);
+  display:inline-block;
+}
+.nav-cta:hover{
+  transform:scale(1.05);
+  box-shadow:0 8px 30px rgba(0,0,0,.12);
+}
+
+.nav-toggle{display:none;background:none;border:none;font-size:1.4rem;cursor:none;color:var(--text)}
+
+/* ═══════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════ */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:120px 0 100px;
+  position:relative;
+  overflow:hidden;
+}
+/* Hero background photo */
+.hero-bg{
+  position:absolute;inset:0;z-index:0;
+  background:
+    linear-gradient(180deg,rgba(250,250,249,.96) 0%,rgba(250,250,249,.93) 40%,rgba(250,250,249,.85) 100%),
+    url('https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1400&q=80') center/cover no-repeat;
+  pointer-events:none;
+}
+.hero-bg::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:160px;
+  background:linear-gradient(to bottom,transparent,var(--bg));
+}
+.hero .container{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+  align-items:start;
+}
+.hero-text{position:relative;z-index:2}
+
+.hero-top{margin-bottom:36px}
+
+.status-badge{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:8px 20px;
+  background:rgba(16,185,129,.08);
+  border:1px solid rgba(16,185,129,.2);
+  border-radius:100px;
+  font-size:.82rem;font-weight:500;color:#059669;
+}
+.status-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#10B981;
+  box-shadow:0 0 0 0 rgba(16,185,129,.4);
+  animation:statusPulse 2s ease-in-out infinite;
+}
+@keyframes statusPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}
+  50%{box-shadow:0 0 0 10px rgba(16,185,129,0)}
+}
+
+.hero-heading{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(3rem,7.5vw,6.5rem);
+  font-weight:800;
+  line-height:.95;
+  letter-spacing:-.045em;
+  margin-bottom:32px;
+  overflow:hidden;
+}
+.hero-heading .line{
+  display:block;
+  overflow:hidden;
+  padding-bottom:4px;
+}
+.hero-heading .line-inner{
+  display:block;
+  transform:translateY(110%);
+  transition:transform .9s var(--ease-out);
+}
+.hero-heading.revealed .line-inner{
+  transform:translateY(0);
+}
+.hero-heading .line:nth-child(1) .line-inner{transition-delay:0s}
+.hero-heading .line:nth-child(2) .line-inner{transition-delay:.12s}
+.hero-heading .line:nth-child(3) .line-inner{transition-delay:.24s}
+
+.hero-heading .accent{color:var(--accent)}
+.hero-heading .outline-text{
+  -webkit-text-stroke:2.5px var(--text-3);
+  color:transparent;
+}
+
+.hero-desc{
+  max-width:520px;
+  font-size:1.15rem;
+  color:var(--text-2);
+  line-height:1.8;
+  margin-bottom:44px;
+  opacity:0;transform:translateY(20px);
+  transition:all .8s var(--ease-out) .5s;
+}
+.hero-desc.revealed{opacity:1;transform:none}
+
+.hero-actions{
+  display:flex;gap:36px;flex-wrap:wrap;align-items:center;
+  opacity:0;transform:translateY(20px);
+  transition:all .8s var(--ease-out) .65s;
+}
+.hero-actions.revealed{opacity:1;transform:none}
+
+/* Magnetic button base */
+.magnetic{
+  position:relative;
+  display:inline-flex;align-items:center;justify-content:center;
+  will-change:transform;
+}
+
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:18px 36px;border-radius:100px;
+  font-size:.95rem;font-weight:600;
+  border:none;
+  transition:box-shadow .4s,background .3s;
+}
+.btn-primary{
+  background:var(--text);color:var(--bg-pure);
+}
+.btn-primary:hover{
+  box-shadow:0 12px 40px rgba(0,0,0,.15);
+}
+.btn-secondary{
+  background:var(--surface);color:var(--text);
+  border:1.5px solid var(--border);
+  box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+.btn-secondary:hover{
+  border-color:var(--text-3);
+  background:var(--bg-pure);
+  box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+
+/* ═══════════════════════════════════════
+   HANGING CARD
+   ═══════════════════════════════════════ */
+.hero-right{
+  position:relative;
+  display:flex;justify-content:flex-end;
+  padding-right:24px;
+  min-height:520px;
+}
+.spring-wrap{
+  position:relative;
+  width:300px;
+  height:100%;
+}
+.spring-svg{
+  position:absolute;
+  top:0;left:0;
+  width:100%;height:600px;
+  pointer-events:none;
+  z-index:3;
+  overflow:visible;
+}
+.spring-line{
+  stroke:var(--text-2);
+  stroke-width:1.2;
+  fill:none;
+}
+/* Pin: small metallic clip */
+.spring-pin-group .pin-ring{
+  fill:none;
+  stroke:var(--text-3);
+  stroke-width:2;
+}
+.spring-pin-group .pin-dot{
+  fill:var(--text-3);
+}
+
+.hanging-card{
+  position:absolute;
+  width:280px;
+  left:10px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:32px 28px;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04);
+  cursor:grab;
+  user-select:none;
+  z-index:2;
+  transition:box-shadow .3s;
+}
+.hanging-card:active{cursor:grabbing}
+.hanging-card:hover{
+  box-shadow:0 28px 70px rgba(0,0,0,.1),0 2px 6px rgba(0,0,0,.05);
+}
+
+.hanging-card .card-avatar{
+  width:90px;height:90px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#818CF8);
+  margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;font-weight:700;color:#fff;
+  font-family:'Space Grotesk',sans-serif;
+}
+.hanging-card .card-name{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.3rem;font-weight:700;
+  margin-bottom:4px;
+}
+.hanging-card .card-role{
+  font-size:.85rem;color:var(--accent);
+  font-weight:500;margin-bottom:20px;
+}
+.hanging-card .card-divider{
+  height:1px;background:var(--border-light);
+  margin:0 -28px 18px;
+}
+.hanging-card .card-stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+}
+.hanging-card .mini-stat{text-align:center}
+.hanging-card .mini-stat-num{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.3rem;font-weight:700;
+  color:var(--text);
+}
+.hanging-card .mini-stat-label{
+  font-size:.65rem;color:var(--text-3);
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.hanging-card .card-location{
+  margin-top:18px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:.8rem;color:var(--text-3);
+}
+
+/* ═══════════════════════════════════════
+   MARQUEE
+   ═══════════════════════════════════════ */
+.marquee-section{
+  padding:36px 0;
+  border-top:1px solid var(--border-light);
+  border-bottom:1px solid var(--border-light);
+  overflow:hidden;
+}
+.marquee-track{
+  display:flex;gap:48px;
+  animation:scroll-left 40s linear infinite;
+  width:max-content;
+}
+.marquee-track span{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1rem;
+  font-weight:600;
+  color:var(--text-3);
+  white-space:nowrap;
+  display:flex;align-items:center;gap:14px;
+  transition:color .3s;
+}
+.marquee-track span:hover{color:var(--accent)}
+.marquee-sep{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);opacity:.4;
+  flex-shrink:0;
+}
+@keyframes scroll-left{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+
+/* ═══════════════════════════════════════
+   SECTION COMMONS
+   ═══════════════════════════════════════ */
+section{padding:120px 0}
+
+.section-eyebrow{
+  font-size:.72rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:3.5px;
+  color:var(--accent);
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-eyebrow::before{
+  content:'';width:24px;height:1.5px;
+  background:var(--accent);
+}
+
+.section-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(2rem,4vw,3.4rem);
+  font-weight:700;
+  letter-spacing:-.035em;
+  line-height:1.1;
+  margin-bottom:64px;
+}
+.section-title .muted{color:var(--text-3)}
+
+/* ═══════════════════════════════════════
+   BENTO GRID
+   ═══════════════════════════════════════ */
+.bento{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:16px;
+}
+
+.bento-card{
+  background:var(--surface);
+  border:1px solid var(--border-light);
+  border-radius:var(--radius);
+  padding:36px;
+  position:relative;
+  overflow:hidden;
+  transform-style:preserve-3d;
+  will-change:transform;
+  transition:border-color .4s,box-shadow .4s;
+
+  /* Reveal */
+  opacity:0;
+  transform:translateY(40px) scale(.97);
+}
+.bento-card.visible{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  transition:opacity .7s var(--ease-out),
+             transform .7s var(--ease-out),
+             border-color .4s,box-shadow .4s;
+}
+
+.bento-card:hover{
+  border-color:var(--border);
+  box-shadow:0 20px 60px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04);
+}
+
+/* Shine overlay for 3D tilt */
+.card-shine{
+  position:absolute;inset:0;
+  pointer-events:none;z-index:2;
+  border-radius:inherit;
+  opacity:0;
+  transition:opacity .3s;
+}
+.bento-card:hover .card-shine{opacity:1}
+
+/* Grid spans */
+.span-4{grid-column:span 4}
+.span-5{grid-column:span 5}
+.span-6{grid-column:span 6}
+.span-7{grid-column:span 7}
+.span-8{grid-column:span 8}
+.span-12{grid-column:span 12}
+.row-2{grid-row:span 2}
+
+.bento-card .card-icon{
+  width:52px;height:52px;
+  border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;
+  margin-bottom:24px;
+  border:1px solid var(--border-light);
+  background:var(--bg);
+}
+.bento-card h3{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.2rem;font-weight:600;
+  letter-spacing:-.01em;
+  margin-bottom:8px;
+}
+.bento-card p{
+  color:var(--text-2);font-size:.88rem;line-height:1.65;
+}
+.card-tag{
+  display:inline-block;
+  padding:5px 14px;
+  background:var(--bg);
+  border:1px solid var(--border-light);
+  border-radius:100px;
+  font-size:.72rem;font-weight:600;
+  color:var(--text-3);
+  margin-top:16px;
+  letter-spacing:.3px;
+}
+
+/* ═══════════════════════════════════════
+   ABOUT BENTO CARDS
+   ═══════════════════════════════════════ */
+.card-about{padding:44px}
+.card-about .card-label{
+  font-size:.72rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:3px;
+  color:var(--accent);margin-bottom:16px;
+}
+.card-about h3{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.6rem;font-weight:700;
+  line-height:1.35;margin-bottom:20px;
+  letter-spacing:-.02em;
+}
+.card-about p{
+  color:var(--text-2);font-size:.95rem;
+  line-height:1.8;margin-bottom:14px;
+}
+
+.edu-block{
+  margin-top:28px;padding:24px;
+  background:var(--bg);
+  border:1px solid var(--border-light);
+  border-radius:var(--radius-sm);
+}
+.edu-block .edu-label{
+  font-size:.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:2px;
+  color:var(--accent);margin-bottom:8px;
+}
+.edu-block h4{font-size:1rem;margin-bottom:4px;font-weight:600}
+.edu-block p{font-size:.85rem;color:var(--text-3);margin:0;line-height:1.5}
+
+/* Stats card */
+.card-stats{padding:0;display:grid;grid-template-columns:1fr 1fr}
+.stat-cell{
+  padding:32px;
+  border-bottom:1px solid var(--border-light);
+  display:flex;flex-direction:column;justify-content:center;
+}
+.stat-cell:nth-child(odd){border-right:1px solid var(--border-light)}
+.stat-cell:nth-child(n+3){border-bottom:none}
+.stat-num{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:2.8rem;font-weight:800;
+  letter-spacing:-.04em;line-height:1;
+  color:var(--accent);
+}
+.stat-label{font-size:.78rem;color:var(--text-3);margin-top:6px}
+
+/* Tech card */
+.tech-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.tech-pill{
+  padding:8px 18px;
+  background:var(--bg);
+  border:1px solid var(--border-light);
+  border-radius:100px;
+  font-size:.78rem;font-weight:500;
+  color:var(--text-2);
+  transition:all .3s var(--ease-out);
+}
+.tech-pill:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+  background:var(--accent-light);
+  transform:translateY(-2px);
+}
+
+/* ═══════════════════════════════════════
+   PROCESS
+   ═══════════════════════════════════════ */
+.process-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+  border-radius:var(--radius);
+  overflow:hidden;
+  border:1px solid var(--border-light);
+}
+.process-card{
+  background:var(--surface);
+  padding:52px 40px;
+  position:relative;
+  transition:background .4s;
+}
+.process-card:hover{background:var(--surface-hover)}
+
+.process-num{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:5rem;font-weight:800;
+  color:var(--border-light);
+  line-height:.9;margin-bottom:24px;
+  letter-spacing:-.05em;
+  transition:color .5s var(--ease-out);
+}
+.process-card:hover .process-num{color:var(--accent)}
+
+.process-card h3{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.2rem;font-weight:600;
+  margin-bottom:12px;
+}
+.process-card p{color:var(--text-2);font-size:.88rem;line-height:1.65}
+
+/* ═══════════════════════════════════════
+   CTA
+   ═══════════════════════════════════════ */
+.cta-section{padding:80px 0 140px}
+
+.cta-box{
+  position:relative;
+  background:var(--text);
+  color:var(--bg-pure);
+  border-radius:32px;
+  padding:80px 60px;
+  text-align:center;
+  overflow:hidden;
+}
+.cta-box::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 20% 50%,rgba(79,70,229,.3) 0%,transparent 50%),
+    radial-gradient(ellipse at 80% 50%,rgba(249,115,22,.2) 0%,transparent 50%);
+  pointer-events:none;
+}
+
+.cta-box h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(2rem,4vw,3.2rem);
+  font-weight:700;letter-spacing:-.03em;
+  margin-bottom:16px;
+  position:relative;
+}
+.cta-box>p{
+  color:rgba(255,255,255,.6);
+  font-size:1.05rem;
+  margin-bottom:40px;
+  max-width:480px;
+  margin-left:auto;margin-right:auto;
+  position:relative;
+}
+.cta-buttons{
+  display:flex;justify-content:center;
+  gap:14px;flex-wrap:wrap;
+  position:relative;
+}
+
+.btn-tg{
+  background:linear-gradient(135deg,#0088cc,#00aaff);
+  color:#fff;padding:18px 36px;border-radius:100px;
+  font-size:.95rem;font-weight:600;
+  border:none;display:inline-flex;align-items:center;gap:10px;
+  transition:all .4s var(--ease-spring);
+}
+.btn-tg:hover{
+  transform:scale(1.04);
+  box-shadow:0 12px 40px rgba(0,136,204,.3);
+}
+
+.btn-ghost-light{
+  padding:18px 36px;border-radius:100px;
+  font-size:.95rem;font-weight:600;
+  border:1.5px solid rgba(255,255,255,.2);
+  color:#fff;display:inline-flex;align-items:center;gap:10px;
+  transition:all .3s;background:transparent;
+}
+.btn-ghost-light:hover{
+  border-color:rgba(255,255,255,.5);
+  background:rgba(255,255,255,.08);
+}
+
+/* ═══════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════ */
+.footer{
+  border-top:1px solid var(--border-light);
+  padding:32px 0;
+  text-align:center;
+  color:var(--text-3);
+  font-size:.85rem;
+}
+
+/* ═══════════════════════════════════════
+   SCROLL REVEAL
+   ═══════════════════════════════════════ */
+.reveal{
+  opacity:0;
+  transform:translateY(30px);
+  transition:opacity .8s var(--ease-out),transform .8s var(--ease-out);
+}
+.reveal.visible{opacity:1;transform:none}
+
+/* ═══════════════════════════════════════
+   PARALLAX ELEMENTS
+   ═══════════════════════════════════════ */
+[data-parallax]{
+  will-change:transform;
+  transition:transform .1s linear;
+}
+/* Floating shapes for parallax */
+.parallax-shape{
+  position:absolute;
+  pointer-events:none;
+  opacity:.08;
+  z-index:0;
+}
+.parallax-shape svg{width:100%;height:100%}
+
+/* ═══════════════════════════════════════
+   SCROLL-DRAW LINE
+   ═══════════════════════════════════════ */
+.scroll-line-svg{
+  position:absolute;
+  top:0;left:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:0;
+  overflow:visible;
+}
+.scroll-line{
+  fill:none;
+  stroke:url(#lineGrad);
+  stroke-width:2.5;
+  stroke-linecap:round;
+  /* dasharray/dashoffset set by JS */
+}
+
+/* ═══════════════════════════════════════
+   CARD DECORATIVE FRAME
+   ═══════════════════════════════════════ */
+.hanging-card::before{
+  content:'';
+  position:absolute;
+  inset:6px;
+  border:1.5px solid var(--accent);
+  border-radius:calc(var(--radius) - 4px);
+  opacity:.12;
+  pointer-events:none;
+}
+/* Corner ornaments */
+.card-corner{
+  position:absolute;
+  width:24px;height:24px;
+  pointer-events:none;
+  opacity:.35;
+}
+.card-corner svg{width:100%;height:100%}
+.card-corner--tl{top:10px;left:10px}
+.card-corner--tr{top:10px;right:10px;transform:scaleX(-1)}
+.card-corner--bl{bottom:10px;left:10px;transform:scaleY(-1)}
+.card-corner--br{bottom:10px;right:10px;transform:scale(-1)}
+
+/* Hole punch at top center of card */
+.card-hole{
+  position:absolute;
+  top:-1px;left:50%;
+  transform:translateX(-50%);
+  width:20px;height:12px;
+  background:var(--bg);
+  border-radius:0 0 10px 10px;
+  border:1px solid var(--border);
+  border-top:none;
+  z-index:3;
+}
+.card-hole::after{
+  content:'';
+  position:absolute;
+  top:3px;left:50%;
+  transform:translateX(-50%);
+  width:6px;height:6px;
+  border-radius:50%;
+  border:1.5px solid var(--text-3);
+}
+
+/* ═══════════════════════════════════════
+   GLOSSY FLOATING SHAPES
+   ═══════════════════════════════════════ */
+.glossy-shape{
+  position:absolute;
+  pointer-events:none;
+  z-index:0;
+  border-radius:50%;
+  opacity:0;
+  transition:opacity .8s .1s, transform 1.4s var(--ease-out);
+}
+.glossy-shape.visible{
+  opacity:1;
+}
+/* Glossy iridescent effect via layered gradients */
+.glossy-sphere{
+  background:
+    radial-gradient(circle at 35% 25%,rgba(255,255,255,.7) 0%,transparent 45%),
+    radial-gradient(circle at 60% 70%,rgba(79,70,229,.3) 0%,transparent 50%),
+    linear-gradient(135deg,#a78bfa 0%,#818cf8 25%,#60a5fa 50%,#34d399 75%,#fbbf24 100%);
+  box-shadow:
+    inset 0 -8px 20px rgba(0,0,0,.08),
+    0 8px 40px rgba(79,70,229,.12),
+    0 2px 10px rgba(0,0,0,.06);
+  animation:glossyFloat 8s ease-in-out infinite;
+}
+.glossy-pill{
+  border-radius:100px;
+  background:
+    radial-gradient(circle at 30% 30%,rgba(255,255,255,.65) 0%,transparent 50%),
+    radial-gradient(circle at 70% 80%,rgba(249,115,22,.25) 0%,transparent 50%),
+    linear-gradient(160deg,#f9a8d4 0%,#a78bfa 40%,#60a5fa 70%,#34d399 100%);
+  box-shadow:
+    inset 0 -6px 16px rgba(0,0,0,.06),
+    0 6px 30px rgba(249,115,22,.1),
+    0 2px 8px rgba(0,0,0,.05);
+  animation:glossyFloat 10s ease-in-out infinite reverse;
+}
+.glossy-cube{
+  border-radius:22%;
+  background:
+    radial-gradient(circle at 25% 25%,rgba(255,255,255,.6) 0%,transparent 50%),
+    radial-gradient(circle at 75% 75%,rgba(244,63,94,.2) 0%,transparent 50%),
+    linear-gradient(140deg,#fbbf24 0%,#f97316 30%,#f43f5e 60%,#a78bfa 100%);
+  box-shadow:
+    inset 0 -6px 18px rgba(0,0,0,.07),
+    0 8px 36px rgba(244,63,94,.1),
+    0 2px 8px rgba(0,0,0,.05);
+  animation:glossyFloat 12s ease-in-out infinite;
+}
+.glossy-donut{
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,var(--bg) 35%,transparent 36%),
+    radial-gradient(circle at 30% 30%,rgba(255,255,255,.5) 0%,transparent 45%),
+    linear-gradient(135deg,#818cf8 0%,#60a5fa 40%,#34d399 70%,#fbbf24 100%);
+  box-shadow:
+    0 8px 40px rgba(79,70,229,.1),
+    0 2px 10px rgba(0,0,0,.05);
+  animation:glossyFloat 9s ease-in-out infinite reverse;
+}
+
+@keyframes glossyFloat{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  50%{transform:translateY(-12px) rotate(6deg)}
+}
+
+/* Slide-in from off-screen edges */
+.glossy-from-left{
+  transform:translateX(-120vw);
+}
+.glossy-from-left.visible{
+  transform:translateX(0);
+}
+.glossy-from-right{
+  transform:translateX(120vw);
+}
+.glossy-from-right.visible{
+  transform:translateX(0);
+}
+
+/* ═══════════════════════════════════════
+   TEXT GRADIENT ANIMATION
+   ═══════════════════════════════════════ */
+.gradient-text{
+  background:linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    #818CF8 25%,
+    #F97316 50%,
+    #818CF8 75%,
+    var(--accent) 100%
+  );
+  background-size:200% 100%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:gradientShift 6s ease-in-out infinite;
+}
+@keyframes gradientShift{
+  0%,100%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+}
+
+/* ═══════════════════════════════════════
+   HORIZONTAL SCROLL PROJECTS
+   ═══════════════════════════════════════ */
+.hscroll-section{
+  position:relative;
+}
+.hscroll-wrapper{
+  /* height controls how long the horizontal scroll "feels" */
+  height:300vh;
+  position:relative;
+}
+.hscroll-sticky{
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  overflow:hidden;
+}
+.hscroll-header{
+  padding:0 32px;
+  max-width:1240px;
+  margin:0 auto;
+  width:100%;
+  margin-bottom:40px;
+}
+.hscroll-track{
+  display:flex;
+  gap:28px;
+  padding:0 max(32px, calc((100vw - 1240px)/2 + 32px));
+  will-change:transform;
+}
+.hscroll-card{
+  flex-shrink:0;
+  width:420px;
+  background:var(--surface);
+  border:1px solid var(--border-light);
+  border-radius:var(--radius);
+  overflow:hidden;
+  transition:border-color .3s,box-shadow .4s,transform .4s;
+}
+.hscroll-card:hover{
+  border-color:var(--border);
+  box-shadow:0 24px 60px rgba(0,0,0,.07);
+  transform:translateY(-6px);
+}
+.hscroll-card-img{
+  height:220px;
+  background-size:cover;
+  background-position:center;
+  position:relative;
+}
+.hscroll-card-img::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent 60%,rgba(0,0,0,.04) 100%);
+}
+.hscroll-card-body{
+  padding:28px;
+}
+.hscroll-card-body h3{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.2rem;font-weight:600;
+  margin-bottom:8px;
+  letter-spacing:-.01em;
+}
+.hscroll-card-body p{
+  font-size:.85rem;color:var(--text-2);
+  line-height:1.6;
+  margin-bottom:16px;
+}
+.hscroll-tags{display:flex;gap:6px;flex-wrap:wrap}
+.hscroll-tag{
+  padding:4px 12px;
+  background:var(--bg);
+  border:1px solid var(--border-light);
+  border-radius:100px;
+  font-size:.7rem;font-weight:500;
+  color:var(--text-3);
+}
+/* Progress bar at bottom of sticky */
+.hscroll-progress{
+  position:absolute;
+  bottom:32px;
+  left:max(32px, calc((100vw - 1240px)/2 + 32px));
+  right:max(32px, calc((100vw - 1240px)/2 + 32px));
+  height:2px;
+  background:var(--border-light);
+  border-radius:2px;
+}
+.hscroll-progress-bar{
+  height:100%;
+  background:var(--accent);
+  border-radius:2px;
+  width:0%;
+  transition:width .05s linear;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════ */
+@media(max-width:1024px){
+  .bento{grid-template-columns:repeat(6,1fr)}
+  .span-4,.span-5{grid-column:span 3}
+  .span-6,.span-7,.span-8{grid-column:span 6}
+  .span-12{grid-column:span 6}
+}
+
+@media(max-width:768px){
+  .container{padding:0 20px}
+  section{padding:80px 0}
+
+  .nav-links,.nav-cta-wrap{display:none}
+  .nav-links.open{
+    display:flex;flex-direction:column;
+    position:absolute;top:56px;left:0;right:0;
+    background:rgba(250,250,249,.95);
+    backdrop-filter:blur(20px);
+    padding:24px;gap:20px;
+    border-bottom:1px solid var(--border-light);
+  }
+  .nav-toggle{display:block}
+
+  .hero{padding:120px 0 60px;min-height:auto}
+  .hero .container{grid-template-columns:1fr;text-align:center}
+  .hero-text{display:flex;flex-direction:column;align-items:center}
+  .hero-right{justify-content:center;padding-right:0;min-height:440px}
+  .spring-wrap{margin:0 auto}
+  .hanging-card{width:260px}
+
+  .bento{grid-template-columns:1fr}
+  .span-4,.span-5,.span-6,.span-7,.span-8,.span-12{grid-column:span 1}
+  .row-2{grid-row:span 1}
+
+  .process-grid{grid-template-columns:1fr}
+
+  .hscroll-wrapper{height:auto}
+  .hscroll-sticky{position:relative;height:auto;padding:60px 0}
+  .hscroll-track{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding-bottom:20px}
+  .hscroll-card{scroll-snap-align:start;width:85vw;min-width:280px}
+  .hscroll-progress{display:none}
+
+  .cta-box{padding:52px 24px;border-radius:24px}
+
+  .footer .container{flex-direction:column;gap:16px;text-align:center}
+}
+
+@media(max-width:480px){
+  .hero-actions{flex-direction:column;align-items:stretch}
+  .btn,.btn-tg,.btn-ghost-light{justify-content:center;width:100%}
+  .card-stats{grid-template-columns:1fr}
+  .stat-cell:nth-child(odd){border-right:none}
+  .stat-cell:nth-child(3){border-bottom:1px solid var(--border-light)}
+}
+</style>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="mesh-bg"></div>
+<div class="blob-canvas">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<!-- Scroll-drawing decorative line -->
+<div id="scrollLineWrap" style="position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:0">
+  <svg class="scroll-line-svg" id="scrollLineSvg" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="lineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#4F46E5" stop-opacity="0.4"/>
+        <stop offset="40%" stop-color="#818CF8" stop-opacity="0.3"/>
+        <stop offset="70%" stop-color="#A78BFA" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#F97316" stop-opacity="0.2"/>
+      </linearGradient>
+    </defs>
+    <path class="scroll-line" id="scrollLinePath"/>
+  </svg>
+</div>
+
+<!-- ═══════ NAV ═══════ -->
+<nav class="nav" id="nav">
+  <div class="container">
+    <a href="#" class="nav-logo magnetic" data-strength=".2">andrey<span>.</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#services" class="magnetic" data-strength=".15">Услуги</a></li>
+      <li><a href="#about" class="magnetic" data-strength=".15">Обо мне</a></li>
+      <li><a href="#process" class="magnetic" data-strength=".15">Подход</a></li>
+      <li><a href="#contact" class="magnetic" data-strength=".15">Контакты</a></li>
+    </ul>
+    <div class="nav-cta-wrap">
+      <a href="#contact" class="nav-cta magnetic" data-strength=".25"><span>Обсудить проект</span></a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-label="Меню">&#9776;</button>
+  </div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero" id="hero">
+  <div class="hero-bg" data-parallax="-0.15"></div>
+
+  <!-- Parallax floating shapes -->
+  <div class="parallax-shape" style="top:15%;left:8%;width:80px;height:80px" data-parallax="-0.25">
+    <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="38" stroke="#4F46E5" stroke-width="1.5" fill="none"/></svg>
+  </div>
+  <div class="parallax-shape" style="top:60%;right:12%;width:60px;height:60px" data-parallax="0.2">
+    <svg viewBox="0 0 60 60"><rect x="5" y="5" width="50" height="50" rx="12" stroke="#F97316" stroke-width="1.5" fill="none" transform="rotate(15 30 30)"/></svg>
+  </div>
+  <div class="parallax-shape" style="top:35%;left:55%;width:40px;height:40px" data-parallax="-0.35">
+    <svg viewBox="0 0 40 40"><polygon points="20,2 38,38 2,38" stroke="#818CF8" stroke-width="1.5" fill="none"/></svg>
+  </div>
+
+  <div class="container">
+    <div class="hero-text">
+      <div class="hero-top">
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          Открыт для новых проектов
+        </div>
+      </div>
+
+      <h1 class="hero-heading" id="heroHeading">
+        <span class="line"><span class="line-inner">Создаю</span></span>
+        <span class="line"><span class="line-inner accent">цифровые</span></span>
+        <span class="line"><span class="line-inner"><span class="outline-text">продукты</span></span></span>
+      </h1>
+
+      <p class="hero-desc" id="heroDesc">
+        Сайты, Telegram-боты, парсеры и приложения. Помогаю бизнесу и стартапам
+        быстро превращать идеи в рабочие решения без лишних затрат.
+      </p>
+
+      <div class="hero-actions" id="heroActions">
+        <a href="#contact" class="btn btn-primary magnetic" data-strength=".3">
+          <span>Написать мне</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>
+        </a>
+        <a href="#services" class="btn btn-secondary magnetic" data-strength=".3">
+          <span>Что я делаю</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Hanging avatar card on elastic string -->
+    <div class="hero-right">
+      <div class="spring-wrap" id="springWrap">
+        <svg class="spring-svg" id="springSvg">
+          <path class="spring-line" id="springLine"/>
+          <g class="spring-pin-group" id="springPinGroup">
+            <circle class="pin-ring" cx="150" cy="8" r="7"/>
+            <circle class="pin-dot" cx="150" cy="8" r="2.5"/>
+          </g>
+        </svg>
+        <div class="hanging-card" id="hangingCard">
+          <!-- Hole punch where string attaches -->
+          <div class="card-hole"></div>
+          <!-- Corner ornaments -->
+          <div class="card-corner card-corner--tl"><svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.5"><path d="M2 12 L2 2 L12 2"/></svg></div>
+          <div class="card-corner card-corner--tr"><svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.5"><path d="M2 12 L2 2 L12 2"/></svg></div>
+          <div class="card-corner card-corner--bl"><svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.5"><path d="M2 12 L2 2 L12 2"/></svg></div>
+          <div class="card-corner card-corner--br"><svg viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="1.5"><path d="M2 12 L2 2 L12 2"/></svg></div>
+
+          <div class="card-avatar">А</div>
+          <div class="card-name">Андрей</div>
+          <div class="card-role">Fullstack-разработчик</div>
+          <div class="card-divider"></div>
+          <div class="card-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-num">4+</div>
+              <div class="mini-stat-label">года</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-num">50+</div>
+              <div class="mini-stat-label">проектов</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-num">100%</div>
+              <div class="mini-stat-label">результат</div>
+            </div>
+          </div>
+          <div class="card-location">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Москва, Россия
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ MARQUEE ═══════ -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span>Web-разработка<i class="marquee-sep"></i></span>
+    <span>Telegram-боты<i class="marquee-sep"></i></span>
+    <span>Mini Apps<i class="marquee-sep"></i></span>
+    <span>Desktop<i class="marquee-sep"></i></span>
+    <span>Парсеры<i class="marquee-sep"></i></span>
+    <span>ИИ интеграция<i class="marquee-sep"></i></span>
+    <span>MVP<i class="marquee-sep"></i></span>
+    <span>Python<i class="marquee-sep"></i></span>
+    <span>C/C++<i class="marquee-sep"></i></span>
+    <span>React<i class="marquee-sep"></i></span>
+    <span>Web-разработка<i class="marquee-sep"></i></span>
+    <span>Telegram-боты<i class="marquee-sep"></i></span>
+    <span>Mini Apps<i class="marquee-sep"></i></span>
+    <span>Desktop<i class="marquee-sep"></i></span>
+    <span>Парсеры<i class="marquee-sep"></i></span>
+    <span>ИИ интеграция<i class="marquee-sep"></i></span>
+    <span>MVP<i class="marquee-sep"></i></span>
+    <span>Python<i class="marquee-sep"></i></span>
+    <span>C/C++<i class="marquee-sep"></i></span>
+    <span>React<i class="marquee-sep"></i></span>
+  </div>
+</div>
+
+<!-- ═══════ SERVICES ═══════ -->
+<!-- Glossy shapes -->
+<div style="position:relative;height:0;z-index:1">
+  <div class="glossy-shape glossy-sphere glossy-from-right" style="width:75px;height:75px;top:40px;right:18%"></div>
+  <div class="glossy-shape glossy-pill glossy-from-left" style="width:100px;height:50px;top:20px;left:12%"></div>
+</div>
+
+<section id="services" style="position:relative">
+  <!-- Parallax deco -->
+  <div class="parallax-shape" style="top:5%;right:5%;width:100px;height:100px;opacity:.05" data-parallax="0.15">
+    <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" stroke="#4F46E5" stroke-width="1" fill="none"/><circle cx="50" cy="50" r="30" stroke="#4F46E5" stroke-width="1" fill="none"/></svg>
+  </div>
+  <div class="parallax-shape" style="bottom:10%;left:3%;width:70px;height:70px;opacity:.06" data-parallax="-0.2">
+    <svg viewBox="0 0 70 70"><rect x="5" y="5" width="60" height="60" rx="15" stroke="#F97316" stroke-width="1" fill="none" transform="rotate(20 35 35)"/></svg>
+  </div>
+  <div class="container">
+    <div class="section-eyebrow reveal">Услуги</div>
+    <h2 class="section-title reveal"><span class="gradient-text">Что я могу</span><br><span class="muted">для вас сделать</span></h2>
+
+    <div class="bento" id="bentoServices">
+
+      <div class="bento-card span-7 tilt-card" data-stagger="0">
+        <div class="card-shine"></div>
+        <div class="card-icon">&#127760;</div>
+        <h3>Web-разработка</h3>
+        <p>Лендинги, корпоративные сайты, интернет-магазины. Доработка, копирование, ускорение и защита существующих проектов. Адаптивная вёрстка, SEO-оптимизация.</p>
+        <span class="card-tag">HTML / CSS / JS / React</span>
+      </div>
+
+      <div class="bento-card span-5 tilt-card" data-stagger="1">
+        <div class="card-shine"></div>
+        <div class="card-icon">&#128172;</div>
+        <h3>Telegram-боты и Mini Apps</h3>
+        <p>Автоворонки, приём платежей, интеграция с CRM и внешними API. Полноценные Mini Apps для вашего бизнеса.</p>
+        <span class="card-tag">Python / aiogram / TMA</span>
+      </div>
+
+      <div class="bento-card span-4 tilt-card" data-stagger="2">
+        <div class="card-shine"></div>
+        <div class="card-icon">&#128187;</div>
+        <h3>Desktop-приложения</h3>
+        <p>Кроссплатформенные решения для автоматизации рабочих процессов.</p>
+        <span class="card-tag">Qt / .NET / Delphi</span>
+      </div>
+
+      <div class="bento-card span-4 tilt-card" data-stagger="3">
+        <div class="card-shine"></div>
+        <div class="card-icon">&#128268;</div>
+        <h3>Парсеры данных</h3>
+        <p>Сбор данных с сайтов, API, соцсетей. Экспорт в любом формате.</p>
+        <span class="card-tag">Scrapy / Selenium</span>
+      </div>
+
+      <div class="bento-card span-4 tilt-card" data-stagger="4">
+        <div class="card-shine"></div>
+        <div class="card-icon">&#129504;</div>
+        <h3>Интеграция ИИ</h3>
+        <p>Внедрение LLM в проекты: чатботы, генерация контента, аналитика.</p>
+        <span class="card-tag">OpenAI / LangChain</span>
+      </div>
+
+      <div class="bento-card span-12 tilt-card" data-stagger="5">
+        <div class="card-shine"></div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center">
+          <div class="card-icon" style="width:64px;height:64px;font-size:2rem;margin:0">&#128640;</div>
+          <div>
+            <h3>MVP для стартапов</h3>
+            <p>Быстрый запуск минимально жизнеспособного продукта. Помогу выбрать архитектуру, избежать лишних доработок и сократить time-to-market. Не просто пишу код — выступаю техническим партнёром.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ ABOUT ═══════ -->
+<div style="position:relative;height:0;z-index:1">
+  <div class="glossy-shape glossy-cube glossy-from-left" style="width:58px;height:58px;top:-20px;left:20%"></div>
+  <div class="glossy-shape glossy-donut glossy-from-right" style="width:80px;height:80px;top:10px;right:15%"></div>
+</div>
+
+<section id="about" style="position:relative">
+  <div class="parallax-shape" style="top:10%;left:4%;width:50px;height:50px;opacity:.06" data-parallax="0.25">
+    <svg viewBox="0 0 50 50"><polygon points="25,2 48,48 2,48" stroke="#818CF8" stroke-width="1" fill="none"/></svg>
+  </div>
+  <div class="parallax-shape" style="bottom:15%;right:6%;width:90px;height:90px;opacity:.04" data-parallax="-0.15">
+    <svg viewBox="0 0 90 90"><circle cx="45" cy="45" r="43" stroke="#4F46E5" stroke-width="1" fill="none" stroke-dasharray="8 6"/></svg>
+  </div>
+  <div class="container">
+    <div class="section-eyebrow reveal">Обо мне</div>
+    <h2 class="section-title reveal"><span class="gradient-text">Разработчик</span><br><span class="muted">и технический партнёр</span></h2>
+
+    <div class="bento" id="bentoAbout">
+
+      <div class="bento-card span-7 row-2 card-about tilt-card" data-stagger="0">
+        <div class="card-shine"></div>
+        <div class="card-label">Андрей</div>
+        <h3>Помогаю бизнесу превращать идеи в рабочие цифровые решения</h3>
+        <p>В профессиональной разработке с 2022 года. Реализовал десятки проектов — от лендингов до комплексных веб-платформ и Telegram-ботов с интеграцией платёжных систем.</p>
+        <p>Подключаюсь не только как исполнитель, но и как технический партнёр: помогаю выбрать стек, выстроить архитектуру и избежать лишних затрат. Особый акцент — на автоматизации и экономии ресурсов.</p>
+        <div class="edu-block">
+          <div class="edu-label">Образование</div>
+          <h4>МГТУ им. Н.Э. Баумана</h4>
+          <p>Кафедра ИУ6 &laquo;Компьютерные системы и сети&raquo;</p>
+          <p>Информатика и вычислительная техника</p>
+        </div>
+      </div>
+
+      <div class="bento-card span-5 card-stats tilt-card" data-stagger="1">
+        <div class="card-shine"></div>
+        <div class="stat-cell"><div class="stat-num" data-count="4">0</div><div class="stat-label">года в разработке</div></div>
+        <div class="stat-cell"><div class="stat-num" data-count="50">0</div><div class="stat-label">проектов</div></div>
+        <div class="stat-cell"><div class="stat-num" data-count="100">0</div><div class="stat-label">% до результата</div></div>
+        <div class="stat-cell"><div class="stat-num" data-count="24">0</div><div class="stat-label">ч — время ответа</div></div>
+      </div>
+
+      <div class="bento-card span-5 tilt-card" data-stagger="2">
+        <div class="card-shine"></div>
+        <h3>Технологии</h3>
+        <p>Инструменты, которые использую ежедневно</p>
+        <div class="tech-pills">
+          <span class="tech-pill">Python</span>
+          <span class="tech-pill">FastAPI</span>
+          <span class="tech-pill">Django</span>
+          <span class="tech-pill">C / C++</span>
+          <span class="tech-pill">JavaScript</span>
+          <span class="tech-pill">React</span>
+          <span class="tech-pill">TypeScript</span>
+          <span class="tech-pill">PostgreSQL</span>
+          <span class="tech-pill">MongoDB</span>
+          <span class="tech-pill">Redis</span>
+          <span class="tech-pill">Docker</span>
+          <span class="tech-pill">Git</span>
+          <span class="tech-pill">Linux</span>
+          <span class="tech-pill">Qt</span>
+          <span class="tech-pill">.NET</span>
+          <span class="tech-pill">Selenium</span>
+          <span class="tech-pill">aiogram</span>
+          <span class="tech-pill">OpenAI API</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PROCESS ═══════ -->
+<div style="position:relative;height:0;z-index:1">
+  <div class="glossy-shape glossy-sphere glossy-from-left" style="width:55px;height:55px;top:-15px;left:25%"></div>
+  <div class="glossy-shape glossy-pill glossy-from-right" style="width:90px;height:44px;top:25px;right:20%"></div>
+</div>
+
+<section id="process">
+  <div class="container">
+    <div class="section-eyebrow reveal">Подход</div>
+    <h2 class="section-title reveal"><span class="gradient-text">Как строится</span><br><span class="muted">работа</span></h2>
+
+    <div class="process-grid reveal">
+      <div class="process-card">
+        <div class="process-num">01</div>
+        <h3>Обсуждение</h3>
+        <p>Разбираем задачу, цели и ограничения. Предлагаю архитектуру и стек, оцениваю сроки. Без скрытых доплат.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">02</div>
+        <h3>Разработка</h3>
+        <p>Итерации с регулярными демо. Вы видите прогресс на каждом этапе и вносите правки по ходу.</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">03</div>
+        <h3>Запуск</h3>
+        <p>Деплой, тестирование, передача доступов и документации. Остаюсь на связи для поддержки.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ PROJECTS (Horizontal Scroll) ═══════ -->
+<div style="position:relative;height:0;z-index:1">
+  <div class="glossy-shape glossy-donut glossy-from-left" style="width:65px;height:65px;top:-25px;left:15%"></div>
+  <div class="glossy-shape glossy-cube glossy-from-right" style="width:52px;height:52px;top:15px;right:22%"></div>
+</div>
+
+<section class="hscroll-section" id="projects">
+  <div class="hscroll-wrapper" id="hscrollWrapper">
+    <div class="hscroll-sticky" id="hscrollSticky">
+      <div class="hscroll-header">
+        <div class="section-eyebrow">Проекты</div>
+        <h2 class="section-title" style="margin-bottom:0"><span class="gradient-text">Избранные</span> <span class="muted">работы</span></h2>
+      </div>
+      <div class="hscroll-track" id="hscrollTrack">
+
+        <div class="hscroll-card">
+          <div class="hscroll-card-img" style="background:linear-gradient(135deg,#667eea,#764ba2)"></div>
+          <div class="hscroll-card-body">
+            <h3>E-commerce платформа</h3>
+            <p>Интернет-магазин с каталогом, корзиной, оплатой и личным кабинетом. 3000+ товаров, интеграция с 1С.</p>
+            <div class="hscroll-tags">
+              <span class="hscroll-tag">React</span>
+              <span class="hscroll-tag">FastAPI</span>
+              <span class="hscroll-tag">PostgreSQL</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hscroll-card">
+          <div class="hscroll-card-img" style="background:linear-gradient(135deg,#f093fb,#f5576c)"></div>
+          <div class="hscroll-card-body">
+            <h3>Telegram-бот для салона красоты</h3>
+            <p>Онлайн-запись, напоминания, приём оплаты. Интеграция с Google Calendar и CRM салона.</p>
+            <div class="hscroll-tags">
+              <span class="hscroll-tag">Python</span>
+              <span class="hscroll-tag">aiogram</span>
+              <span class="hscroll-tag">Redis</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hscroll-card">
+          <div class="hscroll-card-img" style="background:linear-gradient(135deg,#4facfe,#00f2fe)"></div>
+          <div class="hscroll-card-body">
+            <h3>Парсер маркетплейсов</h3>
+            <p>Автоматический сбор цен и отзывов с Ozon, Wildberries, Яндекс.Маркет. Дашборд аналитики.</p>
+            <div class="hscroll-tags">
+              <span class="hscroll-tag">Scrapy</span>
+              <span class="hscroll-tag">Selenium</span>
+              <span class="hscroll-tag">MongoDB</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hscroll-card">
+          <div class="hscroll-card-img" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)"></div>
+          <div class="hscroll-card-body">
+            <h3>AI-чатбот для поддержки</h3>
+            <p>Чатбот на базе GPT-4 для автоматизации первой линии поддержки. Снизил нагрузку на операторов на 60%.</p>
+            <div class="hscroll-tags">
+              <span class="hscroll-tag">OpenAI API</span>
+              <span class="hscroll-tag">LangChain</span>
+              <span class="hscroll-tag">FastAPI</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hscroll-card">
+          <div class="hscroll-card-img" style="background:linear-gradient(135deg,#43e97b,#38f9d7)"></div>
+          <div class="hscroll-card-body">
+            <h3>Desktop CRM для логистики</h3>
+            <p>Кроссплатформенное приложение для управления заказами, маршрутами и водителями. 50+ пользователей.</p>
+            <div class="hscroll-tags">
+              <span class="hscroll-tag">Qt / C++</span>
+              <span class="hscroll-tag">PostgreSQL</span>
+              <span class="hscroll-tag">REST API</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hscroll-card">
+          <div class="hscroll-card-img" style="background:linear-gradient(135deg,#fa709a,#fee140)"></div>
+          <div class="hscroll-card-body">
+            <h3>Telegram Mini App — доставка еды</h3>
+            <p>Полноценное приложение внутри Telegram: меню, корзина, оплата, отслеживание курьера в реальном времени.</p>
+            <div class="hscroll-tags">
+              <span class="hscroll-tag">React</span>
+              <span class="hscroll-tag">TMA SDK</span>
+              <span class="hscroll-tag">Node.js</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="hscroll-progress">
+        <div class="hscroll-progress-bar" id="hscrollProgress"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ CTA ═══════ -->
+<section class="cta-section" id="contact">
+  <div class="container">
+    <div class="cta-box reveal">
+      <h2>Есть идея?<br>Давайте обсудим.</h2>
+      <p>Напишите — предложу оптимальное решение под ваши задачи. Первая консультация бесплатно.</p>
+      <div class="cta-buttons">
+        <a href="https://t.me/" class="btn-tg magnetic" data-strength=".25" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.492-1.302.48-.428-.013-1.252-.242-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          <span>Telegram</span>
+        </a>
+        <a href="mailto:" class="btn-ghost-light magnetic" data-strength=".25">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <span>Email</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2026 Андрей. Все права защищены.</p>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════
+     SCRIPTS
+     ═══════════════════════════════════════ -->
+<script>
+(function(){
+  'use strict';
+
+  const isTouchDevice = 'ontouchstart' in window;
+
+  // ──────────── MAGNETIC BUTTONS ────────────
+  document.querySelectorAll('.magnetic').forEach(el => {
+    const strength = parseFloat(el.dataset.strength) || 0.3;
+
+    el.addEventListener('mousemove', e => {
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      el.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
+      const inner = el.querySelector('span');
+      if (inner) inner.style.transform = `translate(${x * strength * 0.5}px, ${y * strength * 0.5}px)`;
+    });
+
+    el.addEventListener('mouseleave', () => {
+      el.style.transition = 'transform .5s cubic-bezier(.25,.46,.45,.94)';
+      el.style.transform = 'translate(0,0)';
+      const inner = el.querySelector('span');
+      if (inner) {
+        inner.style.transition = 'transform .5s cubic-bezier(.25,.46,.45,.94)';
+        inner.style.transform = 'translate(0,0)';
+      }
+      setTimeout(() => {
+        el.style.transition = '';
+        if (inner) inner.style.transition = '';
+      }, 500);
+    });
+  });
+
+  // ──────────── 3D TILT CARDS ────────────
+  document.querySelectorAll('.tilt-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      const rotateX = (0.5 - y) * 12;
+      const rotateY = (x - 0.5) * 12;
+
+      card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01,1.01,1.01)`;
+
+      const shine = card.querySelector('.card-shine');
+      if (shine) {
+        shine.style.background = `radial-gradient(circle at ${x*100}% ${y*100}%, rgba(255,255,255,0.18) 0%, transparent 60%)`;
+      }
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transition = 'transform .6s cubic-bezier(.16,1,.3,1)';
+      card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) scale3d(1,1,1)';
+      const shine = card.querySelector('.card-shine');
+      if (shine) shine.style.background = 'none';
+      setTimeout(() => card.style.transition = '', 600);
+    });
+  });
+
+  // ──────────── SCROLL REVEALS ────────────
+  const revealIO = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealIO.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => revealIO.observe(el));
+
+  // Glossy shapes slide-in
+  document.querySelectorAll('.glossy-shape').forEach(el => revealIO.observe(el));
+
+  // Bento staggered reveal
+  document.querySelectorAll('.bento').forEach(grid => {
+    const cards = grid.querySelectorAll('.bento-card');
+    const gridIO = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const stagger = parseInt(entry.target.dataset.stagger) || 0;
+          setTimeout(() => {
+            entry.target.classList.add('visible');
+          }, stagger * 100);
+          gridIO.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+    cards.forEach(card => gridIO.observe(card));
+  });
+
+  // ──────────── ANIMATED COUNTERS ────────────
+  const counters = document.querySelectorAll('[data-count]');
+  const counterIO = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.count);
+        const suffix = target === 4 ? '+' : target === 50 ? '+' : target === 100 ? '' : '';
+        let current = 0;
+        const step = Math.max(1, Math.floor(target / 40));
+        const interval = setInterval(() => {
+          current += step;
+          if (current >= target) {
+            current = target;
+            clearInterval(interval);
+          }
+          el.textContent = current + suffix;
+        }, 30);
+        counterIO.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(c => counterIO.observe(c));
+
+  // ──────────── HERO ENTRANCE ────────────
+  window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => document.getElementById('heroHeading').classList.add('revealed'), 200);
+    setTimeout(() => document.getElementById('heroDesc').classList.add('revealed'), 100);
+    setTimeout(() => document.getElementById('heroActions').classList.add('revealed'), 100);
+  });
+
+  // ──────────── NAV SCROLL ────────────
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', scrollY > 60);
+  }, { passive: true });
+
+  // ──────────── MOBILE MENU ────────────
+  const toggle = document.getElementById('navToggle');
+  const links = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => {
+    links.classList.toggle('open');
+    toggle.textContent = links.classList.contains('open') ? '\u2715' : '\u2630';
+  });
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    links.classList.remove('open');
+    toggle.textContent = '\u2630';
+  }));
+
+  // ──────────── SCROLL-DRAW LINE ────────────
+  // Line flows through the content area connecting sections.
+  // Once drawn, segments stay visible.
+  (function initScrollLine() {
+    const wrap = document.getElementById('scrollLineWrap');
+    const svg = document.getElementById('scrollLineSvg');
+    const path = document.getElementById('scrollLinePath');
+    if (!wrap || !path) return;
+
+    // Get section centers to route the line through them
+    function getSectionAnchors() {
+      const sections = ['services','about','process','contact'];
+      const anchors = [];
+      const containerLeft = (window.innerWidth - Math.min(1240, window.innerWidth - 64)) / 2;
+      const contentW = Math.min(1240, window.innerWidth - 64);
+
+      sections.forEach((id, i) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const absTop = rect.top + window.scrollY;
+        // Alternate between left ~30% and right ~70% within the content area
+        const xRatio = i % 2 === 0 ? 0.25 : 0.72;
+        anchors.push([
+          containerLeft + contentW * xRatio,
+          absTop + rect.height * 0.35
+        ]);
+      });
+      return anchors;
+    }
+
+    function buildPath() {
+      const pageH = document.documentElement.scrollHeight;
+      const w = window.innerWidth;
+
+      wrap.style.height = pageH + 'px';
+      svg.setAttribute('width', w);
+      svg.setAttribute('height', pageH);
+      svg.style.width = w + 'px';
+      svg.style.height = pageH + 'px';
+
+      const anchors = getSectionAnchors();
+      if (anchors.length < 2) return 0;
+
+      // Start above first section
+      const startY = anchors[0][1] - 200;
+      const startX = anchors[0][0] + 50;
+      // End below last section
+      const endY = anchors[anchors.length - 1][1] + 200;
+      const endX = anchors[anchors.length - 1][0] - 30;
+
+      const pts = [[startX, startY], ...anchors, [endX, endY]];
+
+      // Build smooth cubic bezier through all points
+      let d = `M${pts[0][0]},${pts[0][1]}`;
+      for (let i = 1; i < pts.length; i++) {
+        const prev = pts[i - 1];
+        const curr = pts[i];
+        // Smooth vertical bezier handles — large vertical component, gentle horizontal
+        const handleLen = Math.abs(curr[1] - prev[1]) * 0.45;
+        const cpx1 = prev[0];
+        const cpy1 = prev[1] + handleLen;
+        const cpx2 = curr[0];
+        const cpy2 = curr[1] - handleLen;
+        d += ` C${cpx1},${cpy1} ${cpx2},${cpy2} ${curr[0]},${curr[1]}`;
+      }
+
+      path.setAttribute('d', d);
+
+      const len = path.getTotalLength();
+      path.style.strokeDasharray = len;
+      path.style.strokeDashoffset = len;
+      return len;
+    }
+
+    // Delay build to let layout settle
+    let totalLen = 0;
+    let maxDrawn = 0; // track max drawn — line never un-draws
+
+    setTimeout(() => { totalLen = buildPath(); }, 300);
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        maxDrawn = 0;
+        totalLen = buildPath();
+      }, 250);
+    });
+
+    // Draw on scroll — line draws just ahead of viewport bottom.
+    // It only grows, never shrinks back.
+    function updateLine() {
+      if (!totalLen) return;
+      // Find how far the viewport bottom has traveled through the page
+      const viewportBottom = window.scrollY + window.innerHeight;
+      const pageH = document.documentElement.scrollHeight;
+      // Line starts drawing when scrolling begins, finishes when ~90% of page is visible
+      const drawableHeight = pageH * 0.92;
+      const progress = Math.min(1, Math.max(0, (viewportBottom - window.innerHeight * 0.5) / drawableHeight));
+      const drawn = totalLen * progress;
+      if (drawn > maxDrawn) maxDrawn = drawn;
+      path.style.strokeDashoffset = totalLen - maxDrawn;
+    }
+
+    window.addEventListener('scroll', updateLine, { passive: true });
+    // Initial check in case page is already scrolled
+    setTimeout(updateLine, 400);
+  })();
+
+  // ──────────── HORIZONTAL SCROLL PROJECTS ────────────
+  (function initHScroll() {
+    const wrapper = document.getElementById('hscrollWrapper');
+    const sticky = document.getElementById('hscrollSticky');
+    const track = document.getElementById('hscrollTrack');
+    const progressBar = document.getElementById('hscrollProgress');
+    if (!wrapper || !track) return;
+
+    // Only activate on desktop (non-touch or wide screens)
+    const isMobile = window.innerWidth < 769;
+    if (isMobile) return;
+
+    function update() {
+      const wrapRect = wrapper.getBoundingClientRect();
+      const scrollDistance = wrapper.scrollHeight - window.innerHeight;
+      // How far we've scrolled into the wrapper (0 to 1)
+      const progress = Math.max(0, Math.min(1, -wrapRect.top / scrollDistance));
+
+      // How far the track needs to move
+      const maxTranslate = track.scrollWidth - window.innerWidth;
+      track.style.transform = `translate3d(${-progress * maxTranslate}px, 0, 0)`;
+
+      // Update progress bar
+      if (progressBar) {
+        progressBar.style.width = (progress * 100) + '%';
+      }
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+
+  // ──────────── SCROLL PARALLAX ────────────
+  (function initParallax() {
+    const elements = document.querySelectorAll('[data-parallax]');
+    if (!elements.length) return;
+
+    function update() {
+      const scrollY = window.scrollY;
+      elements.forEach(el => {
+        const speed = parseFloat(el.dataset.parallax) || 0;
+        const rect = el.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const viewCenter = window.innerHeight / 2;
+        const offset = (centerY - viewCenter) * speed;
+        el.style.transform = `translate3d(0,${offset}px,0)`;
+      });
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+
+  // ──────────── PARALLAX BLOBS ON MOUSEMOVE ────────────
+  if (!isTouchDevice) {
+    document.addEventListener('mousemove', e => {
+      const x = (e.clientX / window.innerWidth - 0.5);
+      const y = (e.clientY / window.innerHeight - 0.5);
+      document.querySelectorAll('.blob').forEach((blob, i) => {
+        const speed = (i + 1) * 15;
+        blob.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+      });
+    });
+  }
+
+  // ──────────── ELASTIC STRING CARD (2D) ────────────
+  // Badge on a lanyard: drag down/sideways, release -> springs back up.
+  (function initSpringCard() {
+    const wrap = document.getElementById('springWrap');
+    const card = document.getElementById('hangingCard');
+    const stringPath = document.getElementById('springLine');
+    const pinGroup = document.getElementById('springPinGroup');
+    if (!wrap || !card) return;
+
+    // Anchor point (pin at top-center of wrap)
+    const ANCHOR_X = 150;
+    const ANCHOR_Y = 8;         // small offset so pin ring is visible
+    const REST_Y = 90;          // resting Y below anchor
+    const REST_X = 0;           // resting X offset (centered)
+    const CARD_W = 280;
+
+    // Spring physics (2D)
+    const STIFFNESS_Y = 0.04;   // vertical spring
+    const STIFFNESS_X = 0.06;   // horizontal spring (stiffer — snaps back faster)
+    const DAMPING = 0.9;        // bounciness (lower = bouncier)
+    const GRAVITY = 0.35;
+    const MAX_STRETCH_Y = 280;
+    const MIN_Y = -20;
+    const MAX_X = 120;          // max horizontal displacement
+
+    // State
+    let posX = 0, posY = REST_Y;
+    let velX = 0, velY = 0;
+    let isDragging = false;
+    let dragOffX = 0, dragOffY = 0;
+    let prevMX = 0, prevMY = 0;
+    let mouseVX = 0, mouseVY = 0;
+
+    function drawString() {
+      const ax = ANCHOR_X;
+      const ay = ANCHOR_Y;
+      const bx = ANCHOR_X + posX;
+      const by = ANCHOR_Y + posY;
+
+      // Distance from anchor to card
+      const dist = Math.sqrt(posX * posX + posY * posY);
+      const restDist = REST_Y;
+
+      if (dist >= restDist * 0.4) {
+        // Taut: gentle curve based on horizontal offset
+        const sag = posX * 0.15;
+        const cpx = (ax + bx) / 2 + sag * 0.3;
+        const cpy = (ay + by) / 2 + Math.max(0, dist - restDist) * 0.02;
+        stringPath.setAttribute('d', `M${ax},${ay} Q${cpx},${cpy} ${bx},${by}`);
+      } else {
+        // Slack: wavy
+        const wave = Math.min((restDist - dist) * 0.25, 15);
+        const t1 = (by - ay) / 3;
+        stringPath.setAttribute('d',
+          `M${ax},${ay} C${ax + wave},${ay + t1} ${bx - wave},${by - t1} ${bx},${by}`
+        );
+      }
+    }
+
+    function render() {
+      const left = ANCHOR_X + posX - CARD_W / 2;
+      const top = ANCHOR_Y + posY;
+      card.style.left = left + 'px';
+      card.style.top = top + 'px';
+      // Slight tilt based on horizontal offset
+      const tilt = posX * 0.04;
+      card.style.transform = `rotate(${tilt}deg)`;
+      drawString();
+    }
+
+    function tick() {
+      if (!isDragging) {
+        // Spring forces toward rest position
+        const dy = posY - REST_Y;
+        const dx = posX - REST_X;
+
+        const forceY = -STIFFNESS_Y * dy + GRAVITY;
+        const forceX = -STIFFNESS_X * dx;
+
+        velY += forceY;
+        velX += forceX;
+        velY *= DAMPING;
+        velX *= DAMPING;
+        posY += velY;
+        posX += velX;
+
+        // Clamp vertical
+        if (posY < MIN_Y) {
+          posY = MIN_Y;
+          velY = Math.abs(velY) * 0.4;
+        }
+
+        // Stop jitter
+        if (Math.abs(velY) < 0.04 && Math.abs(posY - REST_Y) < 0.3 &&
+            Math.abs(velX) < 0.04 && Math.abs(posX) < 0.3) {
+          posY = REST_Y;
+          posX = REST_X;
+          velY = 0;
+          velX = 0;
+        }
+      }
+
+      render();
+      requestAnimationFrame(tick);
+    }
+
+    // Drag
+    function getXY(e) {
+      const t = e.touches ? e.touches[0] : e;
+      return [t.clientX, t.clientY];
+    }
+
+    function onDragStart(e) {
+      e.preventDefault();
+      isDragging = true;
+      card.style.cursor = 'grabbing';
+      const [mx, my] = getXY(e);
+      const r = wrap.getBoundingClientRect();
+      dragOffX = mx - r.left - (ANCHOR_X + posX);
+      dragOffY = my - r.top - (ANCHOR_Y + posY);
+      prevMX = mx; prevMY = my;
+      mouseVX = 0; mouseVY = 0;
+    }
+
+    function onDragMove(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      const [mx, my] = getXY(e);
+      const r = wrap.getBoundingClientRect();
+
+      let newX = mx - r.left - ANCHOR_X - dragOffX;
+      let newY = my - r.top - ANCHOR_Y - dragOffY;
+
+      // Clamp
+      newY = Math.max(MIN_Y, Math.min(MAX_STRETCH_Y, newY));
+      newX = Math.max(-MAX_X, Math.min(MAX_X, newX));
+
+      // Track velocity
+      mouseVX = mx - prevMX;
+      mouseVY = my - prevMY;
+      prevMX = mx; prevMY = my;
+
+      posX = newX;
+      posY = newY;
+    }
+
+    function onDragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      card.style.cursor = 'grab';
+      // Transfer mouse velocity for fling
+      velX = mouseVX * 0.5;
+      velY = mouseVY * 0.5;
+    }
+
+    card.addEventListener('mousedown', onDragStart);
+    card.addEventListener('touchstart', onDragStart, { passive: false });
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('touchmove', onDragMove, { passive: false });
+    window.addEventListener('mouseup', onDragEnd);
+    window.addEventListener('touchend', onDragEnd);
+
+    // Entrance: small bounce
+    posY = REST_Y - 30;
+    velY = 1.5;
+    tick();
+  })();
+
+})();
+</script>
+</body>
+</html>
