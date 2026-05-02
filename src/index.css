@@ -32,7 +32,7 @@
 
   body {
     margin: 0;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   ::selection {
@@ -58,4 +58,36 @@
 @utility text-stroke-outline {
   -webkit-text-stroke: 2px var(--color-fg);
   color: transparent;
+}
+
+@keyframes pi-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes pi-wave-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(var(--drift-x, -100vw), 0, 0); }
+}
+
+/* About cinematic — мix-blend-difference inverts текст автоматически.
+   Все цвета внутри stage-content должны быть white или прозрачно-white,
+   тогда discounted blend выдаст контраст против любого bg. */
+.about-cinematic-prose {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.about-cinematic-prose em {
+  font-style: italic;
+  color: #fff;
+  font-weight: 500;
+}
+
+.about-cinematic-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
 }

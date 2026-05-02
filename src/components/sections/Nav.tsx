@@ -43,7 +43,7 @@ export function Nav() {
         <div className="max-w-[1280px] mx-auto px-6 md:px-10 flex items-center justify-between gap-6">
           <a
             href="#"
-            className="font-mono text-base font-semibold tracking-tight text-[var(--color-fg)]"
+            className="font-mono text-base font-semibold tracking-tight text-[var(--color-fg)] -ml-4 md:-ml-5"
           >
             andrey<span className="text-[var(--color-fg-subtle)]">.</span>
           </a>

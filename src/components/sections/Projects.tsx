@@ -126,10 +126,9 @@ export function Projects() {
       ref={sectionRef}
       className="relative border-t border-[var(--color-line)]"
     >
-      <div ref={headRef} className="px-6 md:px-10 pt-32 md:pt-44 pb-16 md:pb-20">
+      <div ref={headRef} className="px-6 md:px-10 pt-12 md:pt-20 pb-16 md:pb-20">
         <div className="max-w-[1280px] mx-auto">
-          <p className="reveal-up eyebrow">[ 04 ]&nbsp;&nbsp;проекты</p>
-          <h2 className="reveal-up mt-4 font-extrabold tracking-[-0.035em] leading-[1.0] text-[clamp(2.25rem,5vw,4.5rem)] max-w-3xl">
+          <h2 className="reveal-up font-extrabold tracking-[-0.035em] leading-[1.0] text-[clamp(2.25rem,5vw,4.5rem)] max-w-3xl">
             Избранные
             <br />
             <span className="text-[var(--color-fg-subtle)]">работы</span>

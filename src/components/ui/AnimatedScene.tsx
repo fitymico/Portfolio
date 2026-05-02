@@ -6,8 +6,8 @@ export type SceneType =
   | 'crm'
   | 'mini-app'
 
-// Map of types that have a real video loop (from Higgsfield AI).
-// Empty for now — all rendered as placeholder. Update as scenes are produced.
+// Map of types that have a real video loop (Veo 3.1 via Google Flow).
+// Update as scenes are produced.
 const SCENES_WITH_VIDEO: Partial<Record<SceneType, true>> = {}
 
 type Props = {

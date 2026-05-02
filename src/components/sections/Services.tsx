@@ -6,70 +6,111 @@ import {
   Network,
   Sparkles,
   Rocket,
+  ArrowUpRight,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
-import { TiltCard } from '../ui/TiltCard'
+import { ServicesDecor } from '../ui/ServicesDecor'
+
+type Palette = {
+  bg: string
+  mesh1: string
+  mesh2: string
+  accent: string
+}
 
 type Service = {
-  span: '4' | '5' | '7' | '12'
+  num: string
   icon: LucideIcon
   title: string
   body: string
-  tag: string
-}
-
-const SPAN_CLASS: Record<Service['span'], string> = {
-  '4': 'col-span-1 md:col-span-3 lg:col-span-4',
-  '5': 'col-span-1 md:col-span-6 lg:col-span-5',
-  '7': 'col-span-1 md:col-span-6 lg:col-span-7',
-  '12': 'col-span-1 md:col-span-6 lg:col-span-12',
+  tags: string[]
+  palette: Palette
 }
 
 const SERVICES: Service[] = [
   {
-    span: '7',
+    num: '01',
     icon: Globe,
     title: 'Web-разработка',
     body: 'Лендинги, корпоративные сайты, интернет-магазины. Доработка, копирование, ускорение и защита существующих проектов. Адаптивная вёрстка, SEO-оптимизация.',
-    tag: 'HTML · CSS · JS · React',
+    tags: ['React', 'Next.js', 'TypeScript', 'Tailwind'],
+    palette: {
+      bg: '#FFF7F1',
+      mesh1: '#FFE9DB',
+      mesh2: '#FFD6BE',
+      accent: '#FFD6BE',
+    },
   },
   {
-    span: '5',
+    num: '02',
     icon: MessageSquare,
     title: 'Telegram-боты и Mini Apps',
     body: 'Автоворонки, приём платежей, интеграция с CRM и внешними API. Полноценные Mini Apps для вашего бизнеса.',
-    tag: 'Python · aiogram · TMA',
+    tags: ['Python', 'aiogram', 'TMA SDK', 'Redis'],
+    palette: {
+      bg: '#F2F8FE',
+      mesh1: '#DCEFFE',
+      mesh2: '#BCE0FF',
+      accent: '#BCE0FF',
+    },
   },
   {
-    span: '4',
+    num: '03',
     icon: Monitor,
     title: 'Desktop-приложения',
-    body: 'Кроссплатформенные решения для автоматизации рабочих процессов.',
-    tag: 'Qt · .NET',
+    body: 'Кроссплатформенные решения для автоматизации рабочих процессов и работы с локальными данными.',
+    tags: ['Qt', 'C++', '.NET', 'Tauri'],
+    palette: {
+      bg: '#F4F2FE',
+      mesh1: '#E5DEFE',
+      mesh2: '#D2C7FF',
+      accent: '#D2C7FF',
+    },
   },
   {
-    span: '4',
+    num: '04',
     icon: Network,
     title: 'Парсеры данных',
-    body: 'Сбор данных с сайтов, API, соцсетей. Экспорт в любом формате.',
-    tag: 'Scrapy · Selenium',
+    body: 'Сбор данных с сайтов, API и соцсетей. Обход антибот-защиты, прокси-ротация, экспорт в любом формате.',
+    tags: ['Scrapy', 'Selenium', 'Playwright'],
+    palette: {
+      bg: '#F0FBF4',
+      mesh1: '#DBF0E4',
+      mesh2: '#C5E5D1',
+      accent: '#C5E5D1',
+    },
   },
   {
-    span: '4',
+    num: '05',
     icon: Sparkles,
     title: 'Интеграция ИИ',
-    body: 'Внедрение LLM в проекты: чатботы, генерация контента, аналитика.',
-    tag: 'OpenAI · LangChain',
+    body: 'Внедрение LLM в проекты: чатботы, генерация контента, аналитика, классификация. RAG-пайплайны на ваших данных.',
+    tags: ['OpenAI API', 'LangChain', 'Pinecone'],
+    palette: {
+      bg: '#FFFAEC',
+      mesh1: '#FFF1CC',
+      mesh2: '#FFE5A8',
+      accent: '#FFE5A8',
+    },
   },
   {
-    span: '12',
+    num: '06',
     icon: Rocket,
     title: 'MVP для стартапов',
     body: 'Быстрый запуск минимально жизнеспособного продукта. Помогу выбрать архитектуру, избежать лишних доработок и сократить time-to-market. Не просто пишу код — выступаю техническим партнёром.',
-    tag: 'fullstack · architecture',
+    tags: ['fullstack', 'architecture', 'product'],
+    palette: {
+      bg: '#FFF4F8',
+      mesh1: '#FFDEE9',
+      mesh2: '#FFC7DA',
+      accent: '#FFC7DA',
+    },
   },
 ]
+
+const meshBg = (p: Palette) =>
+  `radial-gradient(at 0% 0%, ${p.mesh1} 0%, transparent 55%), radial-gradient(at 100% 100%, ${p.mesh2} 0%, transparent 55%), radial-gradient(at 80% 0%, ${p.mesh1} 0%, transparent 50%), ${p.bg}`
 
 export function Services() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -78,8 +119,10 @@ export function Services() {
 
   useEffect(() => {
     const head = headRef.current
-    if (!head) return
+    const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[]
+    if (!head || !cards.length) return
 
+    // Header reveal
     const headTrigger = ScrollTrigger.create({
       trigger: head,
       start: 'top 85%',
@@ -100,39 +143,50 @@ export function Services() {
       once: true,
     })
 
-    const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[]
-    gsap.set(cards, { y: 40, opacity: 0, scale: 0.97 })
+    // Stack effect: when next card approaches, current card recedes (scale + opacity + slight y)
+    const stackTriggers: ScrollTrigger[] = []
+    cards.forEach((card, i) => {
+      const next = cards[i + 1]
+      if (!next) return
 
-    const batchTriggers = ScrollTrigger.batch(cards, {
-      start: 'top 88%',
-      onEnter: (els) => {
-        gsap.to(els, {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.9,
-          ease: 'power3.out',
-          stagger: 0.08,
-          overwrite: true,
-        })
-      },
-      once: true,
+      const t = ScrollTrigger.create({
+        trigger: next,
+        start: 'top 75%',
+        end: 'top 10%',
+        scrub: 0.6,
+        onUpdate: (self) => {
+          const p = self.progress
+          gsap.set(card, {
+            scale: 1 - p * 0.08,
+            opacity: 1 - p * 0.55,
+            y: -p * 24,
+          })
+        },
+      })
+      stackTriggers.push(t)
     })
 
     return () => {
       headTrigger.kill()
-      batchTriggers.forEach((t) => t.kill())
+      stackTriggers.forEach((t) => t.kill())
     }
   }, [])
+
+  const decorCards = SERVICES.map((s) => ({
+    num: s.num,
+    color: s.palette.mesh2,
+  }))
 
   return (
     <section
       id="services"
       ref={sectionRef}
-      className="relative py-32 md:py-44 px-6 md:px-10"
+      className="relative pt-16 md:pt-24 pb-32 px-6 md:px-10"
     >
-      <div className="max-w-[1280px] mx-auto">
-        <div ref={headRef} className="mb-16 md:mb-24">
+      <ServicesDecor sectionRef={sectionRef} cards={decorCards} />
+
+      <div className="relative z-10 max-w-[1280px] mx-auto">
+        <div ref={headRef} className="mb-10 md:mb-14">
           <p className="reveal-up eyebrow">[ 01 ]&nbsp;&nbsp;услуги</p>
           <h2 className="reveal-up mt-4 font-extrabold tracking-[-0.035em] leading-[1.0] text-[clamp(2.25rem,5vw,4.5rem)] max-w-3xl">
             Что я могу
@@ -143,41 +197,84 @@ export function Services() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-2">
+        <div className="relative">
           {SERVICES.map((s, i) => {
             const Icon = s.icon
             return (
               <div
-                key={i}
+                key={s.num}
                 ref={(el) => {
                   cardsRef.current[i] = el
                 }}
-                className={SPAN_CLASS[s.span]}
+                className="sticky top-[88px] mb-8 will-change-transform"
+                style={{ zIndex: 10 + i }}
               >
-                <TiltCard className="h-full rounded-2xl bg-[var(--color-bg)] border border-[var(--color-line)] hover:border-[var(--color-fg)] transition-colors">
-                  <div className="p-8 md:p-10 h-full flex flex-col">
-                    <div className="h-12 w-12 rounded-xl border border-[var(--color-line)] flex items-center justify-center mb-6 bg-[var(--color-surface)]">
+                <div
+                  className="rounded-3xl border border-[var(--color-line)] p-8 md:p-14 lg:p-16 min-h-[64vh] flex flex-col justify-between overflow-hidden relative"
+                  style={{ background: meshBg(s.palette) }}
+                >
+                  {/* top: number + tags */}
+                  <div className="flex items-start justify-between gap-6 relative z-10">
+                    <div>
+                      <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-[var(--color-fg-muted)]">
+                        [ {s.num} ]&nbsp;&nbsp;service
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-1.5">
+                        {s.tags.map((t) => (
+                          <span
+                            key={t}
+                            className="font-mono text-[0.7rem] px-3 py-1 rounded-full border border-[var(--color-fg)]/15 bg-[var(--color-bg)]/40 backdrop-blur-sm text-[var(--color-fg)]"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div
+                      className="h-14 w-14 md:h-16 md:w-16 rounded-2xl border border-[var(--color-fg)]/10 flex items-center justify-center shrink-0"
+                      style={{ background: s.palette.accent }}
+                    >
                       <Icon
-                        size={20}
-                        strokeWidth={1.5}
+                        size={24}
+                        strokeWidth={1.6}
                         className="text-[var(--color-fg)]"
                       />
                     </div>
+                  </div>
 
-                    <h3 className="text-xl font-semibold tracking-tight text-[var(--color-fg)] mb-3">
+                  {/* middle: huge title */}
+                  <div className="my-12 relative z-10">
+                    <h3 className="font-extrabold tracking-[-0.035em] leading-[0.95] text-[clamp(2.5rem,7vw,6rem)]">
                       {s.title}
                     </h3>
-                    <p className="text-sm leading-relaxed text-[var(--color-fg-muted)]">
+                    <p className="mt-8 text-lg md:text-xl leading-[1.55] text-[var(--color-fg-muted)] max-w-3xl">
                       {s.body}
                     </p>
+                  </div>
 
-                    <div className="mt-auto pt-6">
-                      <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-[var(--color-fg-subtle)]">
-                        [ {s.tag} ]
+                  {/* bottom: cta + decorative */}
+                  <div className="flex items-end justify-between gap-6 relative z-10">
+                    <a
+                      href="#contact"
+                      className="group inline-flex items-center gap-3 text-sm font-semibold tracking-tight text-[var(--color-fg)]"
+                    >
+                      <span className="border-b border-[var(--color-fg)] pb-0.5">
+                        Обсудить проект
                       </span>
+                      <ArrowUpRight
+                        size={16}
+                        strokeWidth={2}
+                        className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+                      />
+                    </a>
+                    <div
+                      className="font-mono text-[clamp(3rem,8vw,7rem)] font-bold leading-none tracking-tight select-none hidden md:block"
+                      style={{ color: s.palette.mesh2 }}
+                    >
+                      /{s.num}
                     </div>
                   </div>
-                </TiltCard>
+                </div>
               </div>
             )
           })}
