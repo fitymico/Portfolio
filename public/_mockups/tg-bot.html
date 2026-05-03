@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>GiftHunter · Telegram bot mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tg-bg: #F4F4F5;
+    --tg-side: #FFFFFF;
+    --tg-line: #E7E7E8;
+    --tg-line-soft: #F0F0F1;
+    --tg-text: #0F1419;
+    --tg-muted: #707579;
+    --tg-subtle: #A8A8A8;
+    --tg-blue: #3390EC;
+    --tg-blue-soft: #EEF6FE;
+    --tg-bubble-other: #FFFFFF;
+    --tg-bubble-self: #EEFFDE;
+    --tg-chat-bg: #E5DDD3;
+    --tg-online: #4DCD5E;
+
+    /* Brand: deep navy + gold for premium / auction feel */
+    --brand: #2B3F87;
+    --brand-deep: #1B2A60;
+    --brand-soft: #E6EAF6;
+    --gold: #DDB44A;
+    --gold-deep: #B0832E;
+    --gold-soft: #FAF1DC;
+    --green: #16A34A;
+    --green-soft: #DCFCE7;
+    --red: #DC2626;
+    --red-soft: #FEE2E2;
+
+    --traffic-r: #FF5F57;
+    --traffic-y: #FEBC2E;
+    --traffic-g: #28C840;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #2a2a2a; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, 'SF Pro Text', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--tg-text);
+    padding: 32px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-feature-settings: 'tnum'; }
+
+  /* ---- Frame 1280×960 (4:3) ---- */
+  .frame {
+    width: 1280px;
+    height: 960px;
+    background: var(--tg-bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 100px rgba(0,0,0,0.4);
+    border-radius: 12px;
+    position: relative;
+  }
+
+  /* ---- macOS-style titlebar ---- */
+  .titlebar {
+    height: 36px;
+    background: linear-gradient(to bottom, #F2F2F2, #E8E8E8);
+    border-bottom: 1px solid #D0D0D0;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .lights { display: flex; gap: 8px; }
+  .light { width: 12px; height: 12px; border-radius: 50%; }
+  .light.r { background: var(--traffic-r); }
+  .light.y { background: var(--traffic-y); }
+  .light.g { background: var(--traffic-g); }
+  .titlebar .center {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #5C5C5C;
+    letter-spacing: -0.01em;
+  }
+  .titlebar .center .small { color: #9A9A9A; font-weight: 400; margin-left: 6px; }
+
+  /* ---- Layout split ---- */
+  .app {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: 0;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    background: var(--tg-side);
+    border-right: 1px solid var(--tg-line);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .side-top {
+    padding: 12px 14px 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .menu-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    color: #707579;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .menu-btn:hover { background: var(--tg-line-soft); }
+  .search {
+    flex: 1;
+    background: var(--tg-line-soft);
+    border-radius: 22px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--tg-muted);
+  }
+
+  .filters {
+    padding: 4px 12px 8px;
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--tg-line-soft);
+    overflow: hidden;
+  }
+  .filter {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--tg-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .filter.active {
+    background: var(--tg-blue-soft);
+    color: var(--tg-blue);
+  }
+  .filter .b {
+    background: var(--tg-blue);
+    color: #fff;
+    font-size: 10px;
+    border-radius: 999px;
+    padding: 1px 6px;
+    font-weight: 600;
+  }
+
+  .chat-list {
+    flex: 1;
+    overflow: hidden;
+  }
+  .chat-item {
+    display: grid;
+    grid-template-columns: 54px 1fr auto;
+    column-gap: 10px;
+    align-items: center;
+    padding: 10px 14px;
+    cursor: pointer;
+    position: relative;
+  }
+  .chat-item:hover { background: var(--tg-line-soft); }
+  .chat-item.active {
+    background: var(--tg-blue);
+  }
+  .chat-item.active .ci-name,
+  .chat-item.active .ci-last,
+  .chat-item.active .ci-time,
+  .chat-item.active .ci-sender { color: rgba(255,255,255,0.95); }
+  .chat-item.active .ci-last { color: rgba(255,255,255,0.78); }
+  .chat-item.active .badge { background: rgba(255,255,255,0.95); color: var(--tg-blue); }
+  .chat-item.active .pinned-tick { color: rgba(255,255,255,0.7); }
+
+  .avatar {
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    color: #fff;
+    font-weight: 600;
+    font-size: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    letter-spacing: -0.02em;
+  }
+  .avatar.brand {
+    background: linear-gradient(135deg, #2B3F87 0%, #1B2A60 100%);
+    color: var(--gold);
+  }
+  .avatar.saved { background: linear-gradient(135deg, #4FB1FE, #1E8FE0); }
+  .avatar.gold { background: linear-gradient(135deg, #F4CA60, #C99325); }
+  .avatar.violet { background: linear-gradient(135deg, #A66BFF, #7B49E0); }
+  .avatar.green { background: linear-gradient(135deg, #6FCB7E, #2DA855); }
+  .avatar.peach { background: linear-gradient(135deg, #FFB07C, #F47D4A); }
+  .avatar.cyan { background: linear-gradient(135deg, #5DD2EA, #2AABCE); }
+  .avatar.pink { background: linear-gradient(135deg, #FFB6CB, #E985A4); }
+  .avatar.gray { background: linear-gradient(135deg, #C4C8CD, #98A0A7); }
+  .avatar .online {
+    position: absolute;
+    bottom: 2px; right: 2px;
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    background: var(--tg-online);
+    border: 2.5px solid var(--tg-side);
+  }
+  .chat-item.active .avatar .online { border-color: var(--tg-blue); }
+  .avatar.emoji { font-size: 26px; line-height: 1; }
+
+  .ci-body {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .ci-name {
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--tg-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .ci-name .verify {
+    color: var(--tg-blue);
+  }
+  .ci-last {
+    margin-top: 3px;
+    font-size: 13px;
+    color: var(--tg-muted);
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ci-sender { color: var(--tg-text); font-weight: 500; }
+  .ci-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    gap: 4px;
+  }
+  .ci-time {
+    font-size: 12px;
+    color: var(--tg-muted);
+    margin-bottom: 2px;
+  }
+  .badge {
+    background: var(--tg-blue);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 2px 7px;
+    min-width: 20px;
+    text-align: center;
+  }
+  .badge.muted { background: #BDBDBD; }
+  .pinned-tick {
+    color: var(--tg-subtle);
+  }
+
+  /* ===== CHAT AREA ===== */
+  .chat {
+    background: var(--tg-chat-bg);
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.18) 0%, transparent 35%),
+      radial-gradient(circle at 80% 70%, rgba(255,255,255,0.22) 0%, transparent 40%),
+      radial-gradient(circle at 50% 90%, rgba(0,0,0,0.04) 0%, transparent 30%);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+  }
+  .chat-header {
+    height: 64px;
+    background: var(--tg-side);
+    border-bottom: 1px solid var(--tg-line);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .chat-header .avatar { width: 42px; height: 42px; font-size: 16px; }
+  .chat-header .info { flex: 1; min-width: 0; }
+  .chat-header .info .name {
+    font-weight: 600;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: -0.01em;
+  }
+  .chat-header .info .name .verify { color: var(--tg-blue); }
+  .chat-header .info .status {
+    font-size: 13px;
+    color: var(--tg-muted);
+    margin-top: 2px;
+  }
+  .chat-header .info .status.online { color: var(--tg-blue); }
+  .chat-header .actions { display: flex; gap: 4px; }
+  .chat-header .actions .icon-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    color: var(--tg-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .chat-header .actions .icon-btn:hover { background: var(--tg-line-soft); }
+
+  .messages {
+    flex: 1;
+    overflow: hidden;
+    padding: 14px 0 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+  }
+  .messages-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .system {
+    align-self: center;
+    background: rgba(0,0,0,0.18);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 14px;
+    border-radius: 12px;
+    margin: 4px 0;
+    backdrop-filter: blur(8px);
+  }
+
+  .msg {
+    max-width: 580px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .msg.bot { align-self: flex-start; }
+  .msg.user { align-self: flex-end; align-items: flex-end; }
+
+  .bubble {
+    background: var(--tg-bubble-other);
+    border-radius: 14px;
+    padding: 10px 14px 8px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    font-size: 14.5px;
+    line-height: 1.4;
+    color: var(--tg-text);
+    position: relative;
+  }
+  .msg.bot .bubble { border-top-left-radius: 4px; }
+  .msg.user .bubble { background: var(--tg-bubble-self); border-top-right-radius: 4px; }
+  .bubble .time {
+    font-size: 11px;
+    color: var(--tg-muted);
+    margin-left: 8px;
+    float: right;
+    margin-top: 4px;
+  }
+  .bubble .b { font-weight: 600; }
+  .bubble strong { font-weight: 600; }
+
+  .bubble.welcome .greet {
+    margin-bottom: 4px;
+  }
+  .bubble.welcome .greet b {
+    color: var(--brand);
+    font-weight: 700;
+  }
+  .bubble.welcome .sub {
+    color: var(--tg-muted);
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  /* Stats grid inside welcome */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .stat-cell {
+    background: var(--brand-soft);
+    padding: 8px 10px;
+    border-radius: 10px;
+    text-align: left;
+  }
+  .stat-cell.gold { background: var(--gold-soft); }
+  .stat-cell.green { background: var(--green-soft); }
+  .stat-cell .lbl {
+    font-size: 10px;
+    color: var(--tg-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    font-weight: 500;
+  }
+  .stat-cell .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--brand);
+    line-height: 1.1;
+  }
+  .stat-cell.gold .val { color: var(--gold-deep); }
+  .stat-cell.green .val { color: var(--green); }
+  .stat-cell .sub {
+    font-size: 10px;
+    color: var(--tg-muted);
+    margin-top: 1px;
+  }
+
+  /* Inline keyboard */
+  .ikb {
+    display: grid;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .ikb.cols-2 { grid-template-columns: 1fr 1fr; }
+  .ikb.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .ikb.cols-1 { grid-template-columns: 1fr; }
+  .ikb-btn {
+    background: rgba(43,63,135,0.06);
+    color: var(--brand);
+    border-radius: 10px;
+    padding: 9px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    white-space: nowrap;
+  }
+  .ikb-btn:hover { background: var(--brand-soft); }
+  .ikb-btn .ic { width: 15px; height: 15px; flex-shrink: 0; }
+  .ikb-btn.primary {
+    background: var(--brand);
+    color: #fff;
+  }
+  .ikb-btn.primary:hover { background: var(--brand-deep); }
+  .ikb-btn.gold {
+    background: var(--gold);
+    color: #fff;
+  }
+  .ikb-btn.gold:hover { background: var(--gold-deep); }
+
+  /* Snipe-fired card */
+  .snipe-bubble {
+    width: 460px;
+  }
+  .snipe-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-soft);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+  }
+  .snipe-head .dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(22,163,74,0.18);
+  }
+
+  .gift-card {
+    border: 1px solid var(--tg-line);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .gift-cover {
+    height: 130px;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(221,180,74,0.4), transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(43,63,135,0.5), transparent 50%),
+      linear-gradient(135deg, #2B3F87 0%, #1B2A60 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .gift-cover::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(221,180,74,0.25), transparent 60%);
+  }
+  .gift-cover .gift-emoji {
+    font-size: 78px;
+    line-height: 1;
+    z-index: 2;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.35));
+  }
+  .gift-cover .rarity-tag {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    background: rgba(255,255,255,0.92);
+    color: var(--gold-deep);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .gift-cover .rarity-tag::before {
+    content: '★';
+    color: var(--gold);
+  }
+  .gift-cover .id-tag {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    color: rgba(255,255,255,0.85);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    z-index: 3;
+  }
+
+  .gift-info {
+    padding: 12px 14px 12px;
+    background: #fff;
+  }
+  .gift-info .gn {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .price-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--tg-line-soft);
+  }
+  .price-cell .l {
+    font-size: 10px;
+    color: var(--tg-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .price-cell .v {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--tg-text);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+  }
+  .price-cell .v .ton {
+    font-size: 10px;
+    color: var(--tg-muted);
+    font-weight: 500;
+  }
+  .price-cell .v.green { color: var(--green); }
+  .price-cell .delta {
+    font-size: 10px;
+    color: var(--green);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  /* Active snipers list */
+  .snipers-bubble { width: 480px; }
+  .snipers-bubble .sb-head {
+    font-size: 11px;
+    color: var(--brand);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .snipers-bubble .sb-head .count {
+    background: var(--brand-soft);
+    color: var(--brand);
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+  }
+  .sniper-row {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    gap: 10px;
+    padding: 10px 0;
+    align-items: center;
+    border-bottom: 1px solid var(--tg-line-soft);
+  }
+  .sniper-row:last-of-type { border-bottom: none; }
+  .sniper-row .se {
+    font-size: 28px;
+    width: 44px; height: 44px;
+    background: var(--brand-soft);
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .sniper-row .body { min-width: 0; }
+  .sniper-row .body .nm {
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    letter-spacing: -0.01em;
+  }
+  .sniper-row .body .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--tg-muted);
+  }
+  .sniper-row .body .meta .target { color: var(--brand); font-weight: 600; }
+  .sniper-row .stat-pill {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .sniper-row .stat-pill.live {
+    background: var(--green-soft);
+    color: var(--green);
+  }
+  .sniper-row .stat-pill.live .dot {
+    width: 5px; height: 5px;
+    background: var(--green);
+    border-radius: 50%;
+  }
+  .sniper-row .stat-pill.fired {
+    background: var(--gold-soft);
+    color: var(--gold-deep);
+  }
+
+  /* Chat input */
+  .chat-input {
+    height: 56px;
+    background: var(--tg-side);
+    border-top: 1px solid var(--tg-line);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .chat-input .icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    color: var(--tg-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .input-field {
+    flex: 1;
+    background: transparent;
+    font-size: 14.5px;
+    color: var(--tg-muted);
+    padding: 8px 0;
+  }
+  .send-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--tg-blue);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+  <div class="frame">
+
+    <!-- macOS-style titlebar -->
+    <div class="titlebar">
+      <div class="lights">
+        <span class="light r"></span>
+        <span class="light y"></span>
+        <span class="light g"></span>
+      </div>
+      <div class="center">GiftHunter Bot <span class="small">— Telegram</span></div>
+      <span style="width: 50px;"></span>
+    </div>
+
+    <div class="app">
+      <!-- ============ SIDEBAR ============ -->
+      <aside class="sidebar">
+        <div class="side-top">
+          <span class="menu-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          </span>
+          <div class="search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            Поиск
+          </div>
+        </div>
+
+        <div class="filters">
+          <span class="filter active">Все <span class="b">4</span></span>
+          <span class="filter">Личные</span>
+          <span class="filter">Каналы</span>
+          <span class="filter">Боты</span>
+        </div>
+
+        <div class="chat-list">
+
+          <!-- Active: bot -->
+          <div class="chat-item active">
+            <div class="avatar brand">
+              <span style="font-size: 24px;">🎁</span>
+              <span class="online"></span>
+            </div>
+            <div class="ci-body">
+              <div class="ci-name">
+                GiftHunter
+                <svg class="verify" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              </div>
+              <div class="ci-last"><span class="ci-sender">бот:</span> 🎯 Снайпер сработал — Plush Pepe #847</div>
+            </div>
+            <div class="ci-meta">
+              <span class="ci-time">14:32</span>
+              <span class="badge">3</span>
+            </div>
+          </div>
+
+          <!-- Floor Price Alerts -->
+          <div class="chat-item">
+            <div class="avatar gold emoji">📈</div>
+            <div class="ci-body">
+              <div class="ci-name">Floor Price Alerts</div>
+              <div class="ci-last">Diamond Ring · floor +12% за час</div>
+            </div>
+            <div class="ci-meta">
+              <span class="ci-time">14:18</span>
+              <span class="badge">7</span>
+            </div>
+          </div>
+
+          <!-- Saved -->
+          <div class="chat-item">
+            <div class="avatar saved">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3a2 2 0 0 0-2 2v16l9-4 9 4V5a2 2 0 0 0-2-2H5z"/></svg>
+            </div>
+            <div class="ci-body">
+              <div class="ci-name">Избранное</div>
+              <div class="ci-last">Скрин коллекции от 12.04</div>
+            </div>
+            <div class="ci-meta">
+              <span class="ci-time">13:50</span>
+              <span class="pinned-tick">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 4v8l3 3v2H7v-2l3-3V4z"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <!-- TON Wallet -->
+          <div class="chat-item">
+            <div class="avatar cyan">
+              <svg width="24" height="24" viewBox="0 0 56 56" fill="currentColor"><path d="M28 4C14.7 4 4 14.7 4 28s10.7 24 24 24 24-10.7 24-24S41.3 4 28 4zm-9.6 14.4h19.2c1 0 1.7 1.1 1.2 2L29.2 39.5c-.5.9-1.9.9-2.4 0L17.2 20.4c-.5-.9.2-2 1.2-2z"/></svg>
+            </div>
+            <div class="ci-body">
+              <div class="ci-name">TON Wallet</div>
+              <div class="ci-last">Списано 12.5 TON · #TX-9482</div>
+            </div>
+            <div class="ci-meta">
+              <span class="ci-time">14:32</span>
+              <span class="badge">1</span>
+            </div>
+          </div>
+
+          <!-- Gifts Hunters Chat -->
+          <div class="chat-item">
+            <div class="avatar violet">GH</div>
+            <div class="ci-body">
+              <div class="ci-name">Gifts Hunters Chat</div>
+              <div class="ci-last"><span class="ci-sender">Михаил:</span> Плюшевые опять полетели вверх</div>
+            </div>
+            <div class="ci-meta">
+              <span class="ci-time">13:44</span>
+              <span class="badge">12</span>
+            </div>
+          </div>
+
+          <!-- Anna -->
+          <div class="chat-item">
+            <div class="avatar peach">А</div>
+            <div class="ci-body">
+              <div class="ci-name">Анна</div>
+              <div class="ci-last">Глянь канал по дропам, скинула</div>
+            </div>
+            <div class="ci-meta">
+              <span class="ci-time">12:51</span>
+            </div>
+          </div>
+
+          <!-- Telegram Stars -->
+          <div class="chat-item">
+            <div class="avatar gold emoji">⭐</div>
+            <div class="ci-body">
+              <div class="ci-name">Telegram Stars</div>
+              <div class="ci-last">Баланс пополнен · 250 stars</div>
+            </div>
+            <div class="ci-meta">
+              <span class="ci-time">11:30</span>
+            </div>
+          </div>
+
+          <!-- Mom -->
+          <div class="chat-item">
+            <div class="avatar pink">М</div>
+            <div class="ci-body">
+              <div class="ci-name">Мама</div>
+              <div class="ci-last">Не забудь позвонить вечером</div>
+            </div>
+            <div class="ci-meta">
+              <span class="ci-time">Вс</span>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- ============ CHAT ============ -->
+      <section class="chat">
+        <header class="chat-header">
+          <div class="avatar brand"><span style="font-size: 20px;">🎁</span><span class="online"></span></div>
+          <div class="info">
+            <div class="name">
+              GiftHunter
+              <svg class="verify" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+              <span class="mono" style="font-size: 11px; color: var(--tg-muted); font-weight: 400; margin-left: 4px;">@gift_hunter_bot</span>
+            </div>
+            <div class="status online">бот · в сети · 1 247 подписчиков</div>
+          </div>
+          <div class="actions">
+            <span class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+            <span class="icon-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></span>
+          </div>
+        </header>
+
+        <div class="messages">
+          <div class="messages-inner">
+
+            <span class="system">Сегодня</span>
+
+            <!-- Welcome / portfolio + main menu -->
+            <div class="msg bot">
+              <div class="bubble welcome">
+                <div class="greet">Привет, <b>Андрей</b> 👋</div>
+                <div class="sub">Автоснайпер активен. За последние 24 часа поймано 3 редких подарка.</div>
+                <div class="stats">
+                  <div class="stat-cell">
+                    <div class="lbl">Баланс</div>
+                    <div class="val">248.4 <span style="font-size: 11px; color: var(--tg-muted); font-weight: 500;">TON</span></div>
+                    <div class="sub">≈ 184 020 ₽</div>
+                  </div>
+                  <div class="stat-cell gold">
+                    <div class="lbl">В коллекции</div>
+                    <div class="val">47</div>
+                    <div class="sub">из них 6 редких</div>
+                  </div>
+                  <div class="stat-cell green">
+                    <div class="lbl">Прибыль 24ч</div>
+                    <div class="val">+18.2 TON</div>
+                    <div class="sub" style="color: var(--green);">+7.3% к балансу</div>
+                  </div>
+                </div>
+                <div class="ikb cols-3">
+                  <button class="ikb-btn">
+                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m12 7 3 5h-6z"/><path d="M9 12h6"/></svg>
+                    Снайперы
+                  </button>
+                  <button class="ikb-btn">
+                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9 12 3l9 6"/><path d="M5 11v9h14v-9"/></svg>
+                    Маркет
+                  </button>
+                  <button class="ikb-btn">
+                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2M9 4V2m6 2V2"/></svg>
+                    Коллекция
+                  </button>
+                  <button class="ikb-btn">
+                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l4-4 4 4 7-7"/><path d="M14 6h7v7"/></svg>
+                    Аналитика
+                  </button>
+                  <button class="ikb-btn primary">
+                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    Депозит TON
+                  </button>
+                  <button class="ikb-btn">
+                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Настройки
+                  </button>
+                </div>
+                <div class="time">14:30</div>
+              </div>
+            </div>
+
+            <!-- Snipe-fired card -->
+            <div class="msg bot">
+              <div class="bubble snipe-bubble">
+                <div class="snipe-head"><span class="dot"></span>Снайпер сработал</div>
+                <div class="gift-card">
+                  <div class="gift-cover">
+                    <span class="rarity-tag">RARE 1 / 5 000</span>
+                    <span class="id-tag">#847</span>
+                    <span class="gift-emoji">🐻</span>
+                  </div>
+                  <div class="gift-info">
+                    <div class="gn">Plush Pepe</div>
+                    <div class="price-row">
+                      <div class="price-cell">
+                        <div class="l">Куплено за</div>
+                        <div class="v">12.5 <span class="ton">TON</span></div>
+                      </div>
+                      <div class="price-cell">
+                        <div class="l">Floor сейчас</div>
+                        <div class="v green">18.3 <span class="ton">TON</span></div>
+                        <div class="delta">+46.4%</div>
+                      </div>
+                      <div class="price-cell">
+                        <div class="l">Время</div>
+                        <div class="v">82 <span class="ton">мс</span></div>
+                      </div>
+                    </div>
+                    <div class="ikb cols-2">
+                      <button class="ikb-btn gold">Перепродать на маркете</button>
+                      <button class="ikb-btn">В коллекцию</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="time">14:32</div>
+              </div>
+            </div>
+
+            <!-- Active snipers list -->
+            <div class="msg bot">
+              <div class="bubble snipers-bubble">
+                <div class="sb-head">
+                  <span>Активные снайперы</span>
+                  <span class="count">3 из 10</span>
+                </div>
+                <div class="sniper-row">
+                  <span class="se">💍</span>
+                  <div class="body">
+                    <div class="nm">Diamond Ring</div>
+                    <div class="meta">floor 28.4 TON · target <span class="target">≤ 25 TON</span></div>
+                  </div>
+                  <span class="stat-pill live"><span class="dot"></span>В работе</span>
+                </div>
+                <div class="sniper-row">
+                  <span class="se">🌹</span>
+                  <div class="body">
+                    <div class="nm">Vintage Rose</div>
+                    <div class="meta">floor 5.2 TON · target <span class="target">≤ 4.8 TON</span></div>
+                  </div>
+                  <span class="stat-pill live"><span class="dot"></span>В работе</span>
+                </div>
+                <div class="sniper-row">
+                  <span class="se">🍭</span>
+                  <div class="body">
+                    <div class="nm">Lol Pop</div>
+                    <div class="meta">floor 2.1 TON · target <span class="target">≤ 1.9 TON</span></div>
+                  </div>
+                  <span class="stat-pill fired">3 покупки</span>
+                </div>
+                <div class="time">14:32</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Chat input -->
+        <div class="chat-input">
+          <span class="icon-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8 15s1.5 2 4 2 4-2 4-2"/></svg>
+          </span>
+          <span class="icon-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a3 3 0 0 1-3 3H8l-4 4V6a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3z"/></svg>
+          </span>
+          <div class="input-field">Сообщение</div>
+          <span class="icon-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a4 4 0 0 0-4 4v7a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+          </span>
+          <span class="send-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="m3 11 18-8-8 18-2-8z"/></svg>
+          </span>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

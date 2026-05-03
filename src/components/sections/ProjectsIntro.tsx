@@ -177,6 +177,10 @@ export function ProjectsIntro() {
   const pillRight = cx + PILL_W / 2
   const pillTop = cy - PILL_H / 2
   const pillBottom = cy + PILL_H / 2
+  // Safe zones — keep decor anchored to pill edges from running past the
+  // sticky's clipped bounds on smaller viewports.
+  const pillTopSafe = Math.max(pillTop, 30)
+  const pillBottomSafe = Math.min(pillBottom, vp.h - 30)
 
   // Adaptive radii — ensure ring fits within viewport accounting for Nav (88px) and bottom (40px)
   const NAV_CLEARANCE = 96
@@ -355,7 +359,7 @@ export function ProjectsIntro() {
             {/* Vertical guide below pill (top one removed — collided with section label) */}
             <line
               x1={cx}
-              y1={pillBottom + 60}
+              y1={Math.min(pillBottom + 60, vp.h - 8)}
               x2={cx}
               y2={vp.h}
               stroke="var(--color-fg)"
@@ -478,25 +482,25 @@ export function ProjectsIntro() {
           {/* Mono labels around pill */}
           <div
             className="absolute font-mono text-[0.6rem] uppercase tracking-[0.18em] text-[var(--color-fg)]/55"
-            style={{ left: pillLeft - 80, top: pillTop - 8 }}
+            style={{ left: pillLeft - 80, top: pillTopSafe - 8 }}
           >
             01.0
           </div>
           <div
             className="absolute font-mono text-[0.6rem] uppercase tracking-[0.18em] text-[var(--color-fg)]/55"
-            style={{ left: pillRight + 30, top: pillTop - 8 }}
+            style={{ left: pillRight + 30, top: pillTopSafe - 8 }}
           >
             x.215
           </div>
           <div
             className="absolute font-mono text-[0.6rem] uppercase tracking-[0.18em] text-[var(--color-fg)]/55"
-            style={{ left: pillLeft - 80, top: pillBottom - 8 }}
+            style={{ left: pillLeft - 80, top: pillBottomSafe - 8 }}
           >
             06.0
           </div>
           <div
             className="absolute font-mono text-[0.6rem] uppercase tracking-[0.18em] text-[var(--color-fg)]/55"
-            style={{ left: pillRight + 30, top: pillBottom - 8 }}
+            style={{ left: pillRight + 30, top: pillBottomSafe - 8 }}
           >
             y.720
           </div>

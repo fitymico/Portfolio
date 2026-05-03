@@ -19,16 +19,15 @@ const CHAPTERS: Chapter[] = [
             <>
                 <p>
                     Из Москвы. Программирую с университета — поступил на{' '}
-                    <em>ИУ6 МГТУ им. Баумана</em>, кафедра компьютерных систем и сетей,
-                    и с тех пор не отпускает.
+                    <em>ИУ6 МГТУ им. Баумана</em>, кафедра компьютерных систем и сетей.
                 </p>
                 <p>
-                    В коммерческой разработке с 2022 года. До этого — учебные проекты,
-                    олимпиады и первые заказы на фрилансе.
+                    В коммерческой разработке с 2022 года. До этого — учебные проекты
+                    и первые заказы на фрилансе.
                 </p>
             </>
         ),
-        ticker: 'lat 55.751°N · lon 37.617°E · place москва · since 2022',
+        ticker: 'lat 55.751°N · lon 37.617°E · г. москва · since 2022',
     },
     {
         id: 'method',
@@ -37,17 +36,17 @@ const CHAPTERS: Chapter[] = [
         body: (
             <>
                 <p>
-                    Подключаюсь не как <em>исполнитель</em>, а как{' '}
-                    <em>технический партнёр</em>. До кода — разговор: что за задача,
-                    кто пользователь, какая боль.
+                    Подхожу к работе как <em>технический партнёр</em>, а не просто{' '}
+                    <em>исполнитель</em>. До начала разработки обсуждаем задачу,
+                    целевую аудиторию и проблемы, которые требуется решить.
                 </p>
                 <p>
-                    Выбираю стек под продукт, не наоборот. Не тащу <code>React</code>{' '}
-                    туда, где хватит <code>HTML</code>.
+                    Подбираю технологии исходя из требований продукта.
                 </p>
                 <p>
-                    Объясняю простыми словами — без жаргона. Если что-то <em>нельзя</em>{' '}
-                    — говорю до начала, а не после.
+                    Объясняю простым языком, без излишней терминологии.
+                    О технических <em>ограничениях</em> и рисках сообщаю заранее
+                    — до начала работ.
                 </p>
             </>
         ),
@@ -63,22 +62,32 @@ const CHAPTERS: Chapter[] = [
                 <p>
                     Бэк — <code>Python</code> (FastAPI, Django, aiogram) и{' '}
                     <code>Node.js</code>. Базы — <code>PostgreSQL</code>,{' '}
-                    <code>MongoDB</code>, <code>Redis</code>.
+                    <code>MongoDB</code>, <code>Redis</code>, <code>SQLite</code>.{' '}
+                    <code>Docker</code> для деплоя.
                 </p>
                 <p>
                     Фронт — <code>React</code> + <code>TypeScript</code>,{' '}
-                    <code>Next.js</code> для SSR. <code>Tailwind</code> и{' '}
-                    <code>GSAP</code> для движения.
+                    <code>Vue</code>, <code>Next.js</code> для SSR.{' '}
+                    <code>Tailwind</code>, <code>GSAP</code> и{' '}
+                    <code>Three.js</code> для интерфейса и движения. Для быстрых
+                    лендингов — <code>WordPress</code>.
                 </p>
                 <p>
-                    Десктоп — <code>Qt/C++</code>. Парсинг — <code>Selenium</code>,{' '}
-                    <code>Scrapy</code>. AI — <code>OpenAI&nbsp;API</code>,{' '}
-                    <code>LangChain</code>.
+                    Десктоп — <code>Qt/QML/C++</code>, <code>.NET</code> с{' '}
+                    <code>WPF</code>, <code>Electron</code>. Парсинг —{' '}
+                    <code>Selenium</code>, <code>Playwright</code>,{' '}
+                    <code>Scrapy</code>, <code>BeautifulSoup</code>.
+                </p>
+                <p>
+                    AI — <code>OpenAI&nbsp;API</code>, <code>Claude</code>,{' '}
+                    <code>Gemini</code>, локально через <code>Ollama</code>.
+                    Для RAG — <code>LangChain</code>.
+                    Для кастомных моделей — <code>PyTorch</code>.
                 </p>
             </>
         ),
         ticker:
-            'back python · node · 5+   front react · ts · next   desktop qt · c++   data pg · mongo · redis',
+            'back python · node · fastapi   front react · vue · next · ts   desktop qt · qml · .net · electron   data pg · mongo · redis · sqlite',
     },
     {
         id: 'now',
@@ -87,26 +96,37 @@ const CHAPTERS: Chapter[] = [
         body: (
             <>
                 <p>
-                    Беру <em>1–2 проекта</em> в месяц. Приоритет — продуктовая
-                    разработка с нуля и миграции «переписать всё заново».
+                    Откликаюсь в течение <em>4 часов</em>. Если идея ещё сырая —
+                    помогу написать техническое задание, потом код.
                 </p>
                 <p>
-                    Откликаюсь в течение <em>24 часов</em>. Если идея ещё сырая —
-                    помогу написать спецификацию, потом код.
+                    <em>Сопровождаю проект на всех этапах разработки.</em>
                 </p>
             </>
         ),
-        ticker: '● open · 1–2 / month · response < 24h · q3 → q4 2026',
+        ticker: '● open · response < 4h · q3 → q4 2026',
     },
 ]
 
 const STACK_SNAPSHOT: { key: string; items: string }[] = [
     { key: 'backend', items: 'python · fastapi · django · node · aiogram' },
-    { key: 'frontend', items: 'react · typescript · next · tailwind · gsap' },
-    { key: 'desktop / parse', items: 'qt · c++ · selenium · scrapy' },
+    {
+        key: 'frontend',
+        items:
+            'react · vue · next · typescript · tailwind · gsap · three.js · wordpress',
+    },
+    { key: 'desktop', items: 'qt · qml · c++ · .net · wpf · electron' },
+    {
+        key: 'parsing',
+        items: 'selenium · playwright · scrapy · beautifulsoup',
+    },
     {
         key: 'data / infra',
-        items: 'postgresql · mongodb · redis · docker · linux',
+        items: 'postgresql · mongodb · redis · sqlite · docker · linux',
+    },
+    {
+        key: 'ai / ml',
+        items: 'openai · claude · gemini · ollama · langchain · pytorch',
     },
 ]
 
