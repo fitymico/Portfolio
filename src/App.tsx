@@ -1,12 +1,13 @@
 import { LenisProvider } from './lib/lenis'
 import { Nav } from './components/sections/Nav'
 import { Hero } from './components/sections/Hero'
-import { Marquee } from './components/sections/Marquee'
+import { Ornament } from './components/sections/Ornament'
 import { Services } from './components/sections/Services'
 import { About } from './components/sections/About'
 import { Process } from './components/sections/Process'
 import { ProjectsIntro } from './components/sections/ProjectsIntro'
 import { Projects } from './components/sections/Projects'
+import { ProjectsOutro } from './components/sections/ProjectsOutro'
 import { CTA } from './components/sections/CTA'
 import { Footer } from './components/sections/Footer'
 import { ScrollProgress } from './components/ui/ScrollProgress'
@@ -18,12 +19,13 @@ function App() {
       <Nav />
       <main>
         <Hero />
-        <Marquee />
+        <Ornament />
         <Services />
         <About />
         <Process />
         <ProjectsIntro />
         <Projects />
+        <ProjectsOutro />
         <CTA />
       </main>
       <Footer />

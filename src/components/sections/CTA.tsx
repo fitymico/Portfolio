@@ -57,7 +57,7 @@ export function CTA() {
     <section
       id="contact"
       ref={sectionRef}
-      className="relative px-6 md:px-10 pt-24 md:pt-32 pb-24 md:pb-32 border-t border-[var(--color-line)]"
+      className="relative px-6 md:px-10 pt-24 md:pt-32 pb-24 md:pb-32"
     >
       <div className="max-w-[1280px] mx-auto">
         <div

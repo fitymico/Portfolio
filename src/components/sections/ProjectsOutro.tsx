@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 
-// Base pill dimensions in viewport pixels
+// Mirror geometry from ProjectsIntro — same pill so the outro reads as the
+// reverse of the entry.
 const PILL_W = 215
 const PILL_H = 720
-
 const MAX_SCALE = 36
 const LETTER_FONT = 110
-
 const LETTERS = ['W', 'O', 'R', 'K', 'S']
 const Y_OFFSET = 40
-
-const LINE_1 = 'Избранные'
-const LINE_2 = 'работы'
 
 function buildPillPath(vw: number, vh: number, pillW: number, pillH: number) {
   const cx = vw / 2
@@ -33,7 +29,7 @@ function buildPillPath(vw: number, vh: number, pillW: number, pillH: number) {
   ].join(' ')
 }
 
-export function ProjectsIntro() {
+export function ProjectsOutro() {
   const sectionRef = useRef<HTMLElement>(null)
   const stickyRef = useRef<HTMLDivElement>(null)
   const pillRef = useRef<SVGPathElement>(null)
@@ -41,11 +37,6 @@ export function ProjectsIntro() {
   const textRef = useRef<HTMLDivElement>(null)
   const decorRef = useRef<HTMLDivElement>(null)
   const decorLabelsRef = useRef<HTMLDivElement>(null)
-  const titleRef = useRef<HTMLDivElement>(null)
-  const charsLine1Ref = useRef<(HTMLSpanElement | null)[]>([])
-  const charsLine2Ref = useRef<(HTMLSpanElement | null)[]>([])
-  const eyebrowRef = useRef<HTMLParagraphElement>(null)
-  const caretRef = useRef<HTMLSpanElement>(null)
 
   const [vp, setVp] = useState({ w: 1920, h: 1080 })
 
@@ -57,7 +48,7 @@ export function ProjectsIntro() {
     return () => window.removeEventListener('resize', update)
   }, [])
 
-  // Mouse parallax — two depth layers
+  // Mouse parallax — two depth layers (mirrors ProjectsIntro)
   useEffect(() => {
     const decor = decorRef.current
     const labels = decorLabelsRef.current
@@ -71,7 +62,6 @@ export function ProjectsIntro() {
     const onMove = (e: MouseEvent) => {
       const nx = (e.clientX / window.innerWidth - 0.5) * 2
       const ny = (e.clientY / window.innerHeight - 0.5) * 2
-      // Lines shift more (deep), labels shift less (close to viewer)
       dx(nx * -28)
       dy(ny * -28)
       lx(nx * -10)
@@ -88,26 +78,22 @@ export function ProjectsIntro() {
     const text = textRef.current
     const decor = decorRef.current
     const labels = decorLabelsRef.current
-    const title = titleRef.current
-    if (!sticky || !pill || !border || !text || !decor || !labels || !title) return
+    if (!sticky || !pill || !border || !text || !decor || !labels) return
 
     const trigger = ScrollTrigger.create({
       trigger: sticky,
       start: 'top top',
-      end: '+=150%',
+      end: '+=120%',
       pin: true,
       pinSpacing: true,
       scrub: 0.5,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         const p = self.progress
-        // Pill zoom takes the first half of progress; the title typewriter
-        // takes the second half — no idle scroll afterwards, the pin releases
-        // straight into the Projects card flight.
-        const zoomP = Math.min(1, p / 0.5)
-        const eased = zoomP * zoomP
-        const scale = 1 + eased * (MAX_SCALE - 1)
-
+        // Inverse of the entry zoom — pill scales from MAX_SCALE down to 1
+        // with ease-out so the bulk of the shrink happens early.
+        const eased = 1 - (1 - p) * (1 - p)
+        const scale = MAX_SCALE - eased * (MAX_SCALE - 1)
         const newW = PILL_W * scale
         const newH = PILL_H * scale
         const d = buildPillPath(
@@ -119,47 +105,17 @@ export function ProjectsIntro() {
         pill.setAttribute('d', d)
         border.setAttribute('d', d)
 
+        // WORKS letters mirror the pill: start huge (matching pill scale,
+        // invisible inside the all-black field), shrink back with the pill,
+        // and fade in over the second half of progress.
         text.style.transform = `translate(-50%, -50%) scale(${scale})`
-        // Faster fade — disappears around 35% of (zoom-relative) progress
-        text.style.opacity = String(Math.max(0, 1 - zoomP * 3))
-        // Decor fades even quicker
-        const decorOpacity = String(Math.max(0, 1 - zoomP * 2.5))
+        text.style.opacity = String(Math.max(0, (p - 0.4) / 0.6))
+
+        // Decor (rotating ring + axes + labels) fades in as the pill shrinks
+        // and the white field around it reveals.
+        const decorOpacity = String(Math.max(0, (p - 0.3) / 0.7))
         decor.style.opacity = decorOpacity
         labels.style.opacity = decorOpacity
-
-        // Title typewriter runs across the second half of pin progress.
-        // Eyebrow fades in first, then per-char typewriter on the heading.
-        const titleP = Math.min(1, Math.max(0, (p - 0.5) / 0.5))
-        title.style.opacity = titleP > 0 ? '1' : '0'
-
-        const eyebrow = eyebrowRef.current
-        if (eyebrow) {
-          // Eyebrow takes the first 18% of titleP
-          const eyeP = Math.min(1, titleP / 0.18)
-          eyebrow.style.opacity = String(eyeP)
-          eyebrow.style.transform = `translateY(${(1 - eyeP) * 8}px)`
-        }
-
-        // Per-char typewriter — quantized step reveal across both lines
-        const line1 = charsLine1Ref.current
-        const line2 = charsLine2Ref.current
-        const total = line1.length + line2.length
-        // Typewriter starts after eyebrow (0.18 → 1.0 of titleP)
-        const typeP = Math.min(1, Math.max(0, (titleP - 0.18) / 0.82))
-        const visibleCount = Math.floor(typeP * (total + 0.5))
-        line1.forEach((el, i) => {
-          if (el) el.style.opacity = i < visibleCount ? '1' : '0'
-        })
-        line2.forEach((el, i) => {
-          const overall = line1.length + i
-          if (el) el.style.opacity = overall < visibleCount ? '1' : '0'
-        })
-
-        // Caret blinks while typing, hides when done
-        const caret = caretRef.current
-        if (caret) {
-          caret.style.opacity = typeP > 0 && typeP < 1 ? '1' : '0'
-        }
       },
     })
 
@@ -168,9 +124,16 @@ export function ProjectsIntro() {
     }
   }, [])
 
-  const initialD = buildPillPath(vp.w, vp.h, PILL_W, PILL_H)
+  // Initial render: pill at MAX_SCALE so the section visually continues the
+  // all-black state from Projects until pin engages and the shrink begins.
+  const initialD = buildPillPath(
+    vp.w,
+    vp.h,
+    PILL_W * MAX_SCALE,
+    PILL_H * MAX_SCALE,
+  )
 
-  // Decor geometry — derived from pill position
+  // Decor geometry — derived from natural pill position (i.e., end-state)
   const cx = vp.w / 2
   const cy = vp.h / 2 + Y_OFFSET
   const pillLeft = cx - PILL_W / 2
@@ -178,7 +141,6 @@ export function ProjectsIntro() {
   const pillTop = cy - PILL_H / 2
   const pillBottom = cy + PILL_H / 2
 
-  // Adaptive radii — ensure ring fits within viewport accounting for Nav (88px) and bottom (40px)
   const NAV_CLEARANCE = 96
   const BOTTOM_CLEARANCE = 40
   const maxRadius = Math.min(cy - NAV_CLEARANCE, vp.h - cy - BOTTOM_CLEARANCE)
@@ -187,12 +149,17 @@ export function ProjectsIntro() {
   const ringInnerR = Math.min(PILL_H * 0.56, maxRadius - 36)
 
   return (
-    <section ref={sectionRef} className="relative bg-[var(--color-fg)]">
+    <section
+      ref={sectionRef}
+      className="relative bg-[var(--color-fg)]"
+      style={{ marginTop: '-48vh' }}
+    >
       <div
         ref={stickyRef}
         className="relative h-screen w-full overflow-hidden bg-[var(--color-fg)]"
       >
-        {/* Pill + mask + border (white field with pill cutout to dark bg) */}
+        {/* Pill + mask + border — same setup as ProjectsIntro but reversed
+            via the onUpdate. White field, pill cutout reveals dark bg through. */}
         <svg
           className="absolute inset-0"
           width={vp.w}
@@ -200,7 +167,7 @@ export function ProjectsIntro() {
           viewBox={`0 0 ${vp.w} ${vp.h}`}
         >
           <defs>
-            <mask id="pill-zoom-mask">
+            <mask id="pill-zoom-out-mask">
               <rect width={vp.w} height={vp.h} fill="white" />
               <path ref={pillRef} d={initialD} fill="black" />
             </mask>
@@ -210,7 +177,7 @@ export function ProjectsIntro() {
             width={vp.w}
             height={vp.h}
             fill="var(--color-bg)"
-            mask="url(#pill-zoom-mask)"
+            mask="url(#pill-zoom-out-mask)"
           />
 
           <path
@@ -222,11 +189,12 @@ export function ProjectsIntro() {
           />
         </svg>
 
-        {/* Decor layer A — SVG geometric lines (deeper parallax) */}
+        {/* Decor layer A — SVG geometric astro-theme (deeper parallax) */}
         <div
           ref={decorRef}
           aria-hidden
           className="absolute inset-0 pointer-events-none will-change-transform"
+          style={{ opacity: 0 }}
         >
           <svg
             className="absolute inset-0"
@@ -312,10 +280,9 @@ export function ProjectsIntro() {
               strokeOpacity="0.35"
               strokeWidth="1"
             />
-            {/* Ruler ticks on horizontal axes */}
             {Array.from({ length: Math.floor((pillLeft - 60) / 60) }).map(
               (_, i) => {
-                const x = (pillLeft - 60) - (i + 1) * 60
+                const x = pillLeft - 60 - (i + 1) * 60
                 if (x < 20) return null
                 const long = i % 3 === 2
                 return (
@@ -332,27 +299,27 @@ export function ProjectsIntro() {
                 )
               },
             )}
-            {Array.from({ length: Math.floor((vp.w - pillRight - 60) / 60) }).map(
-              (_, i) => {
-                const x = (pillRight + 60) + (i + 1) * 60
-                if (x > vp.w - 20) return null
-                const long = i % 3 === 2
-                return (
-                  <line
-                    key={`r${i}`}
-                    x1={x}
-                    y1={cy - (long ? 8 : 4)}
-                    x2={x}
-                    y2={cy + (long ? 8 : 4)}
-                    stroke="var(--color-fg)"
-                    strokeOpacity={long ? '0.45' : '0.25'}
-                    strokeWidth="1"
-                  />
-                )
-              },
-            )}
+            {Array.from({
+              length: Math.floor((vp.w - pillRight - 60) / 60),
+            }).map((_, i) => {
+              const x = pillRight + 60 + (i + 1) * 60
+              if (x > vp.w - 20) return null
+              const long = i % 3 === 2
+              return (
+                <line
+                  key={`r${i}`}
+                  x1={x}
+                  y1={cy - (long ? 8 : 4)}
+                  x2={x}
+                  y2={cy + (long ? 8 : 4)}
+                  stroke="var(--color-fg)"
+                  strokeOpacity={long ? '0.45' : '0.25'}
+                  strokeWidth="1"
+                />
+              )
+            })}
 
-            {/* Vertical guide below pill (top one removed — collided with section label) */}
+            {/* Vertical guide below pill */}
             <line
               x1={cx}
               y1={pillBottom + 60}
@@ -402,7 +369,7 @@ export function ProjectsIntro() {
               strokeWidth="1"
             />
 
-            {/* Crosshair markers at endpoints of diagonals (close to pill) */}
+            {/* Crosshair markers at endpoints of diagonals */}
             {[
               { x: pillLeft - 100, y: cy - PILL_H * 0.3 },
               { x: pillRight + 100, y: cy - PILL_H * 0.3 },
@@ -474,8 +441,8 @@ export function ProjectsIntro() {
           ref={decorLabelsRef}
           aria-hidden
           className="absolute inset-0 pointer-events-none will-change-transform"
+          style={{ opacity: 0 }}
         >
-          {/* Mono labels around pill */}
           <div
             className="absolute font-mono text-[0.6rem] uppercase tracking-[0.18em] text-[var(--color-fg)]/55"
             style={{ left: pillLeft - 80, top: pillTop - 8 }}
@@ -501,23 +468,20 @@ export function ProjectsIntro() {
             y.720
           </div>
 
-          {/* Top mono indicator — fixed below Nav, never overlaps pill */}
           <div
             className="absolute font-mono text-[0.65rem] uppercase tracking-[0.3em] text-[var(--color-fg)]/65 -translate-x-1/2"
             style={{ left: cx, top: 56 }}
           >
-            section / projects
+            section / next
           </div>
 
-          {/* Bottom mono indicator — fixed near viewport bottom */}
           <div
             className="absolute font-mono text-[0.65rem] uppercase tracking-[0.3em] text-[var(--color-fg)]/65 -translate-x-1/2"
             style={{ left: cx, top: vp.h - 60 }}
           >
-            ↓ scroll to enter
+            ↓ continue
           </div>
 
-          {/* Corner mono labels */}
           <div className="absolute top-6 left-12 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-[var(--color-fg)]/55">
             [ 04 ]&nbsp;&nbsp;chapter
           </div>
@@ -532,13 +496,15 @@ export function ProjectsIntro() {
           </div>
         </div>
 
-        {/* WORKS — vertical, centered (with same Y offset as pill) */}
+        {/* WORKS letters — start huge (matching pill scale, invisible against
+            the all-black field), shrink with pill, fade in as it settles. */}
         <div
           ref={textRef}
           className="absolute left-1/2 z-10 pointer-events-none will-change-transform flex flex-col items-center"
           style={{
             top: `calc(50% + ${Y_OFFSET}px)`,
-            transform: 'translate(-50%, -50%) scale(1)',
+            transform: `translate(-50%, -50%) scale(${MAX_SCALE})`,
+            opacity: 0,
           }}
         >
           {LETTERS.map((l) => (
@@ -550,57 +516,6 @@ export function ProjectsIntro() {
               {l}
             </span>
           ))}
-        </div>
-
-        {/* Projects title — top-left, typewriter reveal. Appears earlier in
-            scroll progress so it's already typing before the pill fully
-            completes its zoom. */}
-        <div
-          ref={titleRef}
-          className="absolute left-6 md:left-12 top-24 md:top-32 z-20 pointer-events-none"
-          style={{ opacity: 0 }}
-        >
-          <p
-            ref={eyebrowRef}
-            className="font-mono text-[0.7rem] uppercase tracking-[0.22em] text-[var(--color-bg)]/60 mb-2 md:mb-3"
-            style={{ opacity: 0, transform: 'translateY(8px)' }}
-          >
-            [ 04 ]&nbsp;&nbsp;проекты
-          </p>
-          <h2 className="font-extrabold tracking-[-0.035em] leading-[0.95] text-[clamp(2.25rem,6vw,5rem)] text-[var(--color-bg)]">
-            <span className="block">
-              {LINE_1.split('').map((c, i) => (
-                <span
-                  key={`l1-${i}`}
-                  ref={(el) => {
-                    charsLine1Ref.current[i] = el
-                  }}
-                  style={{ opacity: 0 }}
-                >
-                  {c}
-                </span>
-              ))}
-            </span>
-            <span className="block text-[var(--color-bg)]/45">
-              {LINE_2.split('').map((c, i) => (
-                <span
-                  key={`l2-${i}`}
-                  ref={(el) => {
-                    charsLine2Ref.current[i] = el
-                  }}
-                  style={{ opacity: 0 }}
-                >
-                  {c}
-                </span>
-              ))}
-              <span
-                ref={caretRef}
-                aria-hidden
-                className="inline-block align-baseline ml-2 w-[0.5ch] h-[0.85em] bg-[var(--color-bg)]/85 translate-y-[0.05em]"
-                style={{ opacity: 0 }}
-              />
-            </span>
-          </h2>
         </div>
       </div>
     </section>
