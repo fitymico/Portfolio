@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { Sun, Moon, RefreshCw } from 'lucide-react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 
 type Chapter = {
@@ -54,40 +55,27 @@ const CHAPTERS: Chapter[] = [
             '01 partner first · 02 stack ← product · 03 plain language · 04 one project',
     },
     {
-        id: 'stack',
-        label: 'stack',
-        title: 'Чем работаю',
+        id: 'terms',
+        label: 'terms',
+        title: 'Гарантии',
         body: (
             <>
                 <p>
-                    Бэк — <code>Python</code> (FastAPI, Django, aiogram) и{' '}
-                    <code>Node.js</code>. Базы — <code>PostgreSQL</code>,{' '}
-                    <code>MongoDB</code>, <code>Redis</code>, <code>SQLite</code>.{' '}
-                    <code>Docker</code> для деплоя.
+                    Работаю по <em>договору</em>. При необходимости подписываю
+                    NDA до начала обсуждения деталей проекта.
                 </p>
                 <p>
-                    Фронт — <code>React</code> + <code>TypeScript</code>,{' '}
-                    <code>Vue</code>, <code>Next.js</code> для SSR.{' '}
-                    <code>Tailwind</code>, <code>GSAP</code> и{' '}
-                    <code>Three.js</code> для интерфейса и движения. Для быстрых
-                    лендингов — <code>WordPress</code>.
+                    Оплата <em>поэтапно</em> — по сданным результатам, а не
+                    за потраченное время.
                 </p>
                 <p>
-                    Десктоп — <code>Qt/QML/C++</code>, <code>.NET</code> с{' '}
-                    <code>WPF</code>, <code>Electron</code>. Парсинг —{' '}
-                    <code>Selenium</code>, <code>Playwright</code>,{' '}
-                    <code>Scrapy</code>, <code>BeautifulSoup</code>.
-                </p>
-                <p>
-                    AI — <code>OpenAI&nbsp;API</code>, <code>Claude</code>,{' '}
-                    <code>Gemini</code>, локально через <code>Ollama</code>.
-                    Для RAG — <code>LangChain</code>.
-                    Для кастомных моделей — <code>PyTorch</code>.
+                    Все исходники, документация и доступы передаются заказчику.
+                    Никакой привязки к моим сервисам или аккаунтам.
                 </p>
             </>
         ),
         ticker:
-            'back python · node · fastapi   front react · vue · next · ts   desktop qt · qml · .net · electron   data pg · mongo · redis · sqlite',
+            '01 договор · 02 nda · 03 этапная оплата · 04 исходники у вас',
     },
     {
         id: 'now',
@@ -133,6 +121,18 @@ const STACK_SNAPSHOT: { key: string; items: string }[] = [
 const N = CHAPTERS.length
 const SEG = 1 / N
 
+type ThemeOverride = 'light' | 'dark' | null
+
+// Background flip mapping. Окно перехода узкое (16% pin-длины), чтобы
+// серый mid-фон не висел долго — на нём карточки и текст в mix-blend-difference
+// читаются хуже. Smoothstep сглаживает старт/финиш без ступеньки.
+const colorInterp = gsap.utils.interpolate('#FFFFFF', '#0A0A0A')
+function flipColor(p: number) {
+    const raw = Math.min(1, Math.max(0, (p - 0.42) / 0.16))
+    const eased = raw * raw * (3 - 2 * raw)
+    return colorInterp(eased)
+}
+
 // ─── Wavy background lines ───
 type WaveLineCfg = {
     yPct: number
@@ -145,12 +145,14 @@ type WaveLineCfg = {
     width?: number
 }
 
+// periods обязательно ЧЁТНЫЕ — drift сдвигается на vp.w = половина path-ширины,
+// и seamless-loop требует целого числа периодов на этом отрезке.
 const WAVE_LINES: WaveLineCfg[] = [
-    { yPct: 0.14, amp: 38, periods: 3, opacity: 0.18, dur: 38, phase: 0 },
-    { yPct: 0.26, amp: 22, periods: 5, opacity: 0.12, dur: 26, phase: 1.5, reverse: true },
+    { yPct: 0.14, amp: 38, periods: 4, opacity: 0.18, dur: 38, phase: 0 },
+    { yPct: 0.26, amp: 22, periods: 6, opacity: 0.12, dur: 26, phase: 1.5, reverse: true },
     { yPct: 0.4, amp: 54, periods: 2, opacity: 0.22, dur: 46, phase: 0.8 },
     { yPct: 0.54, amp: 18, periods: 6, opacity: 0.1, dur: 22, phase: 2.2, reverse: true },
-    { yPct: 0.68, amp: 44, periods: 3, opacity: 0.18, dur: 34, phase: 0.4 },
+    { yPct: 0.68, amp: 44, periods: 4, opacity: 0.18, dur: 34, phase: 0.4 },
     { yPct: 0.82, amp: 26, periods: 4, opacity: 0.14, dur: 28, phase: 1.0, reverse: true },
     { yPct: 0.94, amp: 32, periods: 2, opacity: 0.16, dur: 42, phase: 1.7 },
 ]
@@ -189,6 +191,23 @@ export function About() {
 
     const [activeIdx, setActiveIdx] = useState(0)
     const [vp, setVp] = useState({ w: 1920, h: 1080 })
+    const [themeOverride, setThemeOverride] = useState<ThemeOverride>(null)
+    const themeOverrideRef = useRef<ThemeOverride>(null)
+    const triggerRef = useRef<ScrollTrigger | null>(null)
+
+    useEffect(() => {
+        themeOverrideRef.current = themeOverride
+        const bg = stageBgRef.current
+        if (!bg) return
+        if (themeOverride === 'light') bg.style.backgroundColor = '#FFFFFF'
+        else if (themeOverride === 'dark') bg.style.backgroundColor = '#0A0A0A'
+        else if (triggerRef.current) bg.style.backgroundColor = flipColor(triggerRef.current.progress)
+    }, [themeOverride])
+
+    // Drip-треугольник под pin-сценой раньше был хардкоднут чёрным, потому что
+    // авто-режим всегда заканчивает на #0A0A0A. При override='light' он торчит
+    // как чужеродная фигура — теперь fill следует за выбранной темой.
+    const dripColor = themeOverride === 'light' ? '#FFFFFF' : '#0A0A0A'
 
     useEffect(() => {
         const update = () =>
@@ -263,8 +282,6 @@ export function About() {
             n.style.setProperty('--lsp', '0.06em')
         })
 
-        const colorInterp = gsap.utils.interpolate('#FFFFFF', '#0A0A0A')
-
         const trigger = ScrollTrigger.create({
             trigger: stage,
             start: 'top top',
@@ -276,8 +293,10 @@ export function About() {
             onUpdate: (self) => {
                 const p = self.progress
 
-                const flipP = Math.min(1, Math.max(0, (p - 0.42) / 0.16))
-                bg.style.backgroundColor = colorInterp(flipP)
+                const override = themeOverrideRef.current
+                if (override === 'light') bg.style.backgroundColor = '#FFFFFF'
+                else if (override === 'dark') bg.style.backgroundColor = '#0A0A0A'
+                else bg.style.backgroundColor = flipColor(p)
 
                 cards.forEach((card, i) => {
                     const segCenter = (i + 0.5) * SEG
@@ -324,6 +343,7 @@ export function About() {
                 }
             },
         })
+        triggerRef.current = trigger
 
         const stack = stackRef.current
         let stackTrigger: ScrollTrigger | null = null
@@ -350,6 +370,7 @@ export function About() {
         return () => {
             headTrigger?.kill()
             trigger.kill()
+            triggerRef.current = null
             stackTrigger?.kill()
         }
     }, [])
@@ -563,6 +584,35 @@ export function About() {
                     <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-30 font-mono text-[0.65rem] uppercase tracking-[0.3em] opacity-50">
                         {activeIdx < N - 1 ? '↓ continue' : '↓ end of chapter'}
                     </div>
+
+
+                    {/* Theme override — фиксирует фон поверх scroll-driven логики.
+                        currentColor = white внутри mix-blend-difference контейнера, поэтому
+                        кнопки автоматически читаются и на белом, и на чёрном. */}
+                    <div className="hidden md:flex absolute bottom-6 left-6 md:left-10 z-30 items-center gap-3">
+                        <span className="font-mono text-[0.78rem] uppercase tracking-[0.22em] opacity-60 mr-1">
+                            theme
+                        </span>
+                        {([
+                            { value: 'light' as const, Icon: Sun, label: 'Светлый фон' },
+                            { value: 'dark' as const, Icon: Moon, label: 'Тёмный фон' },
+                            { value: null, Icon: RefreshCw, label: 'По скроллу' },
+                        ]).map(({ value, Icon, label }) => {
+                            const active = themeOverride === value
+                            return (
+                                <button
+                                    key={value ?? 'auto'}
+                                    type="button"
+                                    onClick={() => setThemeOverride(value)}
+                                    aria-label={label}
+                                    title={label}
+                                    className={`h-11 w-11 rounded-full border border-current flex items-center justify-center transition-opacity cursor-pointer ${active ? 'opacity-100' : 'opacity-45 hover:opacity-80'}`}
+                                >
+                                    <Icon size={18} strokeWidth={1.8} />
+                                </button>
+                            )
+                        })}
+                    </div>
                 </div>
             </div>
 
@@ -573,6 +623,16 @@ export function About() {
           their original directions. SVG is absolute so flow position of stack
           content is unaffected. */}
             <div className="relative">
+                {/* Hairline-разделитель ниже pin-сцены при light-теме (где drip-треугольник
+                    сливается с белым стэк-фоном). top:20px = +20px ниже самого края stage. */}
+                {themeOverride === 'light' && (
+                    <div className="absolute left-6 right-6 md:left-10 md:right-10 z-20 pointer-events-none" style={{ top: 20 }}>
+                        <div className="max-w-[1400px] mx-auto">
+                            <div className="h-px bg-[var(--color-line)]" />
+                        </div>
+                    </div>
+                )}
+
                 {/* SVG #1 — filled black triangle (no blend, normal painting) */}
                 <svg
                     aria-hidden
@@ -583,7 +643,7 @@ export function About() {
                 >
                     <path
                         d={`M 0 0 L ${vp.w} 0 L ${apexX} ${triH} Z`}
-                        fill="var(--color-fg)"
+                        fill={dripColor}
                     />
                 </svg>
 
@@ -591,34 +651,38 @@ export function About() {
             ENTIRE SVG element. The SVG composes its white strokes internally,
             then the SVG as a whole blends with the backdrop (stack content +
             page bg). Result: line shows BLACK over white bg (255−255=0),
-            shows WHITE over black heading text (255−10=245). */}
-                <svg
-                    aria-hidden
-                    width={vp.w}
-                    height={dripTotal}
-                    viewBox={`0 0 ${vp.w} ${dripTotal}`}
-                    className="absolute top-0 left-0 pointer-events-none z-10"
-                    style={{ mixBlendMode: 'difference' }}
-                >
-                    {/* Left edge extension — exits at the right edge of the viewport. */}
-                    <line
-                        x1={apexX}
-                        y1={triH}
-                        x2={leftEndX}
-                        y2={leftEndY}
-                        stroke="#FFFFFF"
-                        strokeWidth="1.5"
-                    />
-                    {/* Right edge extension — exits at the left edge of the viewport. */}
-                    <line
-                        x1={apexX}
-                        y1={triH}
-                        x2={rightEndX}
-                        y2={rightEndY}
-                        stroke="#FFFFFF"
-                        strokeWidth="1.5"
-                    />
-                </svg>
+            shows WHITE over black heading text (255−10=245).
+            При light-теме линии теряют визуальный смысл (треугольника-источника
+            нет), поэтому SVG не рендерится вообще. */}
+                {themeOverride !== 'light' && (
+                    <svg
+                        aria-hidden
+                        width={vp.w}
+                        height={dripTotal}
+                        viewBox={`0 0 ${vp.w} ${dripTotal}`}
+                        className="absolute top-0 left-0 pointer-events-none z-10"
+                        style={{ mixBlendMode: 'difference' }}
+                    >
+                        {/* Left edge extension — exits at the right edge of the viewport. */}
+                        <line
+                            x1={apexX}
+                            y1={triH}
+                            x2={leftEndX}
+                            y2={leftEndY}
+                            stroke="#FFFFFF"
+                            strokeWidth="1.5"
+                        />
+                        {/* Right edge extension — exits at the left edge of the viewport. */}
+                        <line
+                            x1={apexX}
+                            y1={triH}
+                            x2={rightEndX}
+                            y2={rightEndY}
+                            stroke="#FFFFFF"
+                            strokeWidth="1.5"
+                        />
+                    </svg>
+                )}
 
                 <div
                     ref={stackRef}

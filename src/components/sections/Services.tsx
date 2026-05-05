@@ -6,18 +6,13 @@ import {
     Network,
     Sparkles,
     Rocket,
+    Cpu,
     ArrowUpRight,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { gsap, ScrollTrigger } from '../../lib/gsap'
 import { ServicesDecor } from '../ui/ServicesDecor'
-
-type Palette = {
-    bg: string
-    mesh1: string
-    mesh2: string
-    accent: string
-}
+import { TelegramPattern } from '../ui/TelegramPattern'
 
 type Service = {
     num: string
@@ -25,7 +20,6 @@ type Service = {
     title: string
     body: string
     tags: string[]
-    palette: Palette
 }
 
 const SERVICES: Service[] = [
@@ -47,12 +41,6 @@ const SERVICES: Service[] = [
             'PostgreSQL',
             'WordPress',
         ],
-        palette: {
-            bg: '#FFF7F1',
-            mesh1: '#FFE9DB',
-            mesh2: '#FFD6BE',
-            accent: '#FFD6BE',
-        },
     },
     {
         num: '02',
@@ -69,12 +57,6 @@ const SERVICES: Service[] = [
             'Telegram Payments',
             'Docker',
         ],
-        palette: {
-            bg: '#F2F8FE',
-            mesh1: '#DCEFFE',
-            mesh2: '#BCE0FF',
-            accent: '#BCE0FF',
-        },
     },
     {
         num: '03',
@@ -92,12 +74,6 @@ const SERVICES: Service[] = [
             'Electron',
             'SQLite',
         ],
-        palette: {
-            bg: '#F4F2FE',
-            mesh1: '#E5DEFE',
-            mesh2: '#D2C7FF',
-            accent: '#D2C7FF',
-        },
     },
     {
         num: '04',
@@ -112,12 +88,6 @@ const SERVICES: Service[] = [
             'Playwright',
             'PostgreSQL',
         ],
-        palette: {
-            bg: '#F0FBF4',
-            mesh1: '#DBF0E4',
-            mesh2: '#C5E5D1',
-            accent: '#C5E5D1',
-        },
     },
     {
         num: '05',
@@ -133,12 +103,6 @@ const SERVICES: Service[] = [
             'LangChain',
             'PyTorch',
         ],
-        palette: {
-            bg: '#FFFAEC',
-            mesh1: '#FFF1CC',
-            mesh2: '#FFE5A8',
-            accent: '#FFE5A8',
-        },
     },
     {
         num: '06',
@@ -153,22 +117,66 @@ const SERVICES: Service[] = [
             'consulting',
             'pivot',
         ],
-        palette: {
-            bg: '#FFF4F8',
-            mesh1: '#FFDEE9',
-            mesh2: '#FFC7DA',
-            accent: '#FFC7DA',
-        },
+    },
+    {
+        num: '07',
+        icon: Cpu,
+        title: 'Программирование МК',
+        body: 'Прошивки и прототипы на Arduino, ESP32/ESP8266, STM32 для IoT, автоматизации и умных домов. Работа с датчиками, дисплеями, Wi-Fi/Bluetooth — от схемы до тестирования.',
+        tags: [
+            'Arduino',
+            'ESP32',
+            'ESP8266',
+            'STM32',
+            'C/C++',
+            'GPIO',
+            'IoT',
+        ],
     },
 ]
 
-const meshBg = (p: Palette) =>
-    `radial-gradient(at 0% 0%, ${p.mesh1} 0%, transparent 55%), radial-gradient(at 100% 100%, ${p.mesh2} 0%, transparent 55%), radial-gradient(at 80% 0%, ${p.mesh1} 0%, transparent 50%), ${p.bg}`
+// Единый фон карточки: белый с заметным серым диагональным mesh.
+// Один и тот же на всех карточках — отличие даёт только tg-паттерн с иконкой.
+const CARD_BG =
+    'radial-gradient(at 0% 0%, #E4E4E4 0%, transparent 55%), radial-gradient(at 100% 100%, #D8D8D8 0%, transparent 60%), linear-gradient(135deg, #FFFFFF 0%, #E8E8E8 100%)'
+
+// Запас сверх максимальной натуральной высоты карточек, px.
+// Берём max, чтобы самая «высокая» карточка (с 2-строчным заголовком) тоже
+// помещалась — иначе justify-between схлопывается и CTA уползает за overflow.
+const HEIGHT_PADDING = 20
 
 export function Services() {
     const sectionRef = useRef<HTMLElement>(null)
     const headRef = useRef<HTMLDivElement>(null)
     const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+    const cardInnersRef = useRef<(HTMLDivElement | null)[]>([])
+    const spacerRef = useRef<HTMLDivElement>(null)
+
+    // Унифицируем высоту всех карточек по самой «высокой» (max) + запас.
+    useEffect(() => {
+        const inners = cardInnersRef.current.filter(Boolean) as HTMLDivElement[]
+        if (!inners.length) return
+
+        const apply = () => {
+            // Сбрасываем фиксированную высоту, чтобы измерить натуральную
+            inners.forEach((el) => {
+                el.style.height = 'auto'
+            })
+            const maxH = Math.max(...inners.map((el) => el.offsetHeight))
+            const target = maxH + HEIGHT_PADDING
+            inners.forEach((el) => {
+                el.style.height = `${target}px`
+            })
+            ScrollTrigger.refresh()
+        }
+
+        apply()
+
+        const onResize = () => apply()
+        window.addEventListener('resize', onResize)
+
+        return () => window.removeEventListener('resize', onResize)
+    }, [])
 
     useEffect(() => {
         const head = headRef.current
@@ -196,11 +204,16 @@ export function Services() {
             once: true,
         })
 
-        // Stack effect: when next card approaches, current card recedes (scale + opacity + slight y)
+        // Stack-эффект: при подходе следующей карточки текущая «отъезжает
+        // вглубь» через scale (origin = центр, без y-сдвига). Так как все
+        // карточки одной высоты, уменьшенная card лежит строго внутри bbox
+        // следующей и нигде не торчит.
         const stackTriggers: ScrollTrigger[] = []
         cards.forEach((card, i) => {
             const next = cards[i + 1]
             if (!next) return
+
+            gsap.set(card, { transformOrigin: '50% 50%' })
 
             const t = ScrollTrigger.create({
                 trigger: next,
@@ -208,27 +221,43 @@ export function Services() {
                 end: 'top 10%',
                 scrub: 0.6,
                 onUpdate: (self) => {
-                    const p = self.progress
                     gsap.set(card, {
-                        scale: 1 - p * 0.08,
-                        opacity: 1 - p * 0.55,
-                        y: -p * 24,
+                        scale: 1 - self.progress * 0.06,
                     })
                 },
             })
             stackTriggers.push(t)
         })
 
+        // Last-card recede: у последней карточки нет «следующей», поэтому
+        // её эффект «отъезда» привязываем к spacer'у — пока он проезжает
+        // через viewport, последняя карточка тоже плавно уменьшается.
+        let lastTrigger: ScrollTrigger | undefined
+        const lastCard = cards[cards.length - 1]
+        const spacer = spacerRef.current
+        if (lastCard && spacer) {
+            gsap.set(lastCard, { transformOrigin: '50% 50%' })
+            lastTrigger = ScrollTrigger.create({
+                trigger: spacer,
+                start: 'top 90%',
+                end: 'top 30%',
+                scrub: 0.6,
+                onUpdate: (self) => {
+                    gsap.set(lastCard, {
+                        scale: 1 - self.progress * 0.06,
+                    })
+                },
+            })
+        }
+
         return () => {
             headTrigger.kill()
             stackTriggers.forEach((t) => t.kill())
+            lastTrigger?.kill()
         }
     }, [])
 
-    const decorCards = SERVICES.map((s) => ({
-        num: s.num,
-        color: s.palette.mesh2,
-    }))
+    const decorCards = SERVICES.map((s) => ({ num: s.num }))
 
     return (
         <section
@@ -263,9 +292,15 @@ export function Services() {
                                 style={{ zIndex: 10 + i }}
                             >
                                 <div
-                                    className="rounded-3xl border border-[var(--color-line)] p-8 md:p-14 lg:p-16 min-h-[64vh] flex flex-col justify-between overflow-hidden relative"
-                                    style={{ background: meshBg(s.palette) }}
+                                    ref={(el) => {
+                                        cardInnersRef.current[i] = el
+                                    }}
+                                    className="rounded-3xl border border-[var(--color-line)] p-8 md:p-14 lg:p-16 flex flex-col justify-between overflow-hidden relative"
+                                    style={{ background: CARD_BG }}
                                 >
+                                    {/* Telegram-style фоновый паттерн с иконкой сервиса */}
+                                    <TelegramPattern Icon={Icon} />
+
                                     {/* top: number + tags */}
                                     <div className="flex items-start justify-between gap-6 relative z-10">
                                         <div>
@@ -276,17 +311,14 @@ export function Services() {
                                                 {s.tags.map((t) => (
                                                     <span
                                                         key={t}
-                                                        className="font-mono text-[0.7rem] px-3 py-1 rounded-full border border-[var(--color-fg)]/15 bg-[var(--color-bg)]/40 backdrop-blur-sm text-[var(--color-fg)]"
+                                                        className="font-mono text-[0.7rem] px-3 py-1 rounded-full border border-[var(--color-fg)]/15 bg-[var(--color-bg)]/60 backdrop-blur-sm text-[var(--color-fg)]"
                                                     >
                                                         {t}
                                                     </span>
                                                 ))}
                                             </div>
                                         </div>
-                                        <div
-                                            className="h-14 w-14 md:h-16 md:w-16 rounded-2xl border border-[var(--color-fg)]/10 flex items-center justify-center shrink-0"
-                                            style={{ background: s.palette.accent }}
-                                        >
+                                        <div className="h-14 w-14 md:h-16 md:w-16 rounded-2xl border border-[var(--color-fg)]/10 bg-[var(--color-bg)]/70 backdrop-blur-sm flex items-center justify-center shrink-0">
                                             <Icon
                                                 size={24}
                                                 strokeWidth={1.6}
@@ -322,7 +354,7 @@ export function Services() {
                                         </a>
                                         <div
                                             className="font-mono text-[clamp(3rem,8vw,7rem)] font-bold leading-none tracking-tight select-none hidden md:block"
-                                            style={{ color: s.palette.mesh2 }}
+                                            style={{ color: 'rgba(10,10,10,0.08)' }}
                                         >
                                             /{s.num}
                                         </div>
@@ -331,6 +363,14 @@ export function Services() {
                             </div>
                         )
                     })}
+                    {/* Spacer: даёт последней карточке полноценный sticky-range,
+                        чтобы card 6 успела доехать до top:88px и зафиксироваться,
+                        а остальные карточки не отлипали раньше времени. */}
+                    <div
+                        ref={spacerRef}
+                        aria-hidden
+                        className="h-[12vh] pointer-events-none"
+                    />
                 </div>
             </div>
         </section>

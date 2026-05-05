@@ -70,6 +70,7 @@ function buildClosedTunnelPath(
 export function Ornament() {
   const [vw, setVw] = useState(1920)
   const textPathRef = useRef<SVGTextPathElement>(null)
+  const textRef = useRef<SVGTextElement>(null)
 
   useEffect(() => {
     const update = () => setVw(window.innerWidth)
@@ -78,24 +79,41 @@ export function Ornament() {
     return () => window.removeEventListener('resize', update)
   }, [])
 
-  // Continuously slide the text along the path. The shift is one
-  // BINARY_PATTERN width (~92px at the chosen font/letter spacing), so each
-  // animation cycle ends visually identical to the start.
+  // Continuously slide the text along the path. The shift must equal exactly
+  // one BINARY_PATTERN width — иначе на стыке цикла будет визуальный прыжок.
+  // Раньше было захардкожено 92px, но реальная ширина зависит от шрифта и
+  // масштаба, поэтому замеряем через getSubStringLength после загрузки fonts.
   useEffect(() => {
     const tp = textPathRef.current
-    if (!tp) return
-    const tween = gsap.fromTo(
-      tp,
-      { attr: { startOffset: 0 } },
-      {
-        attr: { startOffset: -92 },
-        duration: 6,
-        ease: 'none',
-        repeat: -1,
-      },
-    )
+    const text = textRef.current
+    if (!tp || !text) return
+
+    let tween: gsap.core.Tween | undefined
+
+    const start = () => {
+      const patternWidth = text.getSubStringLength(0, BINARY_PATTERN.length)
+      // На скорости ~15px/sec — duration пропорциональна ширине pattern.
+      const duration = patternWidth / 15
+      tween = gsap.fromTo(
+        tp,
+        { attr: { startOffset: 0 } },
+        {
+          attr: { startOffset: -patternWidth },
+          duration,
+          ease: 'none',
+          repeat: -1,
+        },
+      )
+    }
+
+    if (document.fonts && document.fonts.status !== 'loaded') {
+      document.fonts.ready.then(start)
+    } else {
+      start()
+    }
+
     return () => {
-      tween.kill()
+      tween?.kill()
     }
   }, [vw])
 
@@ -148,6 +166,7 @@ export function Ornament() {
 
         {/* Binary stream — text rendered along the midline curve */}
         <text
+          ref={textRef}
           fontFamily="var(--font-mono)"
           fontSize="11"
           fill="var(--color-fg)"
